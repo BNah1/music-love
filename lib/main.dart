@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:musiclove/home_view.dart';
 
+import 'feature/play_music/presentation/view/widget/play_music_view.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -14,7 +16,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const HomeView(),
+      home: const PlayMusicView(),
     );
   }
 }
