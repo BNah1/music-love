@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:musiclove/feature/presentation/view/chat_room_view.dart';
 
 
 
@@ -11,7 +12,7 @@ class AppRoutes {
   static const String home = '/home';
   static const String taskView = '/taskView';
   static const String onBoarding = '/onBoarding';
-  static const String chatBox = '/chatBox';
+  static const String chatRoom = '/chatRoom';
   static const String userInfoChat = '/userInfoChat';
   static const String searchChat = '/searchChat';
   static const String test = '/test';
@@ -19,6 +20,8 @@ class AppRoutes {
   static Route onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
 
+      case chatRoom:
+        return MaterialPageRoute(builder: (_) => const ChatRoomView());
 
       default:
         return _cupertinoRoute(Scaffold(
