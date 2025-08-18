@@ -41,3 +41,5 @@ String formatDayOfWeek(DateTime date){
   final dayOfWeek = DateFormat('EEEE').format(date);
   return dayOfWeek;
 }
+
+
