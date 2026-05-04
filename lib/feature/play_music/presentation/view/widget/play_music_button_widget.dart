@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:musiclove/core/constant/app_enum.dart';
 import 'package:musiclove/core/constant/app_path.dart';
+import 'package:musiclove/core/constant/theme.dart';
 
 class PlayMusicButtonWidget extends StatelessWidget {
   final EnumPlayMusic enumPlayMusic;
@@ -17,6 +18,7 @@ class PlayMusicButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appTheme = AppTheme.extensionOf(context);
     final double buttonSize = isBigButton ? 70 : 50;
 
     return GestureDetector(
@@ -27,13 +29,19 @@ class PlayMusicButtonWidget extends StatelessWidget {
         width: buttonSize,
         padding: EdgeInsets.all(isBigButton ? 18 : 12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.25),
+          color: appTheme.selectedIconColor.withOpacity(0.25),
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.white30, width: 1.5),
+          border: Border.all(
+            color: appTheme.selectedIconColor.withOpacity(0.30),
+            width: 1.5,
+          ),
         ),
         child: SvgPicture.asset(
           _getPathSvg(enumPlayMusic),
-          colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+          colorFilter: ColorFilter.mode(
+            appTheme.selectedIconColor,
+            BlendMode.srcIn,
+          ),
         ),
       ),
     );
@@ -41,11 +49,16 @@ class PlayMusicButtonWidget extends StatelessWidget {
 
   String _getPathSvg(EnumPlayMusic type) {
     switch (type) {
-      case EnumPlayMusic.next: return AppPath.playMusicIcon[0];
-      case EnumPlayMusic.back: return AppPath.playMusicIcon[1];
-      case EnumPlayMusic.pause: return AppPath.playMusicIcon[2];
-      case EnumPlayMusic.play: return AppPath.playMusicIcon[3];
-      default: return AppPath.playMusicIcon[3];
+      case EnumPlayMusic.next:
+        return AppPath.playMusicIcon[0];
+      case EnumPlayMusic.back:
+        return AppPath.playMusicIcon[1];
+      case EnumPlayMusic.pause:
+        return AppPath.playMusicIcon[2];
+      case EnumPlayMusic.play:
+        return AppPath.playMusicIcon[3];
+      default:
+        return AppPath.playMusicIcon[3];
     }
   }
 }

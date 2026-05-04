@@ -3,14 +3,17 @@ import 'package:go_router/go_router.dart';
 import 'package:musiclove/feature/play_music/presentation/view/widget/mini_player_overlay.dart';
 
 import '../core/constant/routes.dart';
+import '../core/constant/theme.dart';
 
 class MainShellView extends StatelessWidget {
   const MainShellView({super.key, required this.child});
-   final Widget child;
+
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
           child,
@@ -18,35 +21,34 @@ class MainShellView extends StatelessWidget {
             alignment: Alignment.bottomCenter,
             child: MiniPlayerOverlay(),
           ),
-
           Positioned(
-              bottom: 10,
-              left: 10,
-              right: 10,
-              child: _buildBottomNav(context))
-
+            bottom: 10,
+            left: 10,
+            right: 10,
+            child: _buildBottomNav(context),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildBottomNav(BuildContext context) {
+    final appTheme = AppTheme.extensionOf(context);
     final String location = GoRouterState.of(context).uri.toString();
     int currentIndex = 0;
     if (location.startsWith(AppRoutes.playList)) currentIndex = 1;
     if (location.startsWith(AppRoutes.setting)) currentIndex = 2;
-
 
     return SafeArea(
       child: Container(
         height: 65,
         padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.8), // Nền nhạt hơn cho thanh bar
+          color: appTheme.navBackground,
           borderRadius: BorderRadius.circular(25),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: appTheme.shadowColor,
               blurRadius: 20,
               offset: const Offset(0, -5),
             ),
@@ -54,16 +56,31 @@ class MainShellView extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            // Lớp nền chạy (Indicator)
-            _buildAnimatedIndicator(currentIndex),
-
-            // Các Icon chính
+            _buildAnimatedIndicator(context, currentIndex),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavItem(context, 0, Icons.dashboard_rounded, "Home", currentIndex),
-                _buildNavItem(context, 1, Icons.library_music_rounded, "Library", currentIndex),
-                _buildNavItem(context, 2, Icons.settings_rounded, "Settings", currentIndex),
+                _buildNavItem(
+                  context,
+                  0,
+                  Icons.dashboard_rounded,
+                  'Home',
+                  currentIndex,
+                ),
+                _buildNavItem(
+                  context,
+                  1,
+                  Icons.library_music_rounded,
+                  'Library',
+                  currentIndex,
+                ),
+                _buildNavItem(
+                  context,
+                  2,
+                  Icons.settings_rounded,
+                  'Settings',
+                  currentIndex,
+                ),
               ],
             ),
           ],
@@ -72,8 +89,9 @@ class MainShellView extends StatelessWidget {
     );
   }
 
-// Widget điều khiển "viên thuốc" chạy dưới icon
-  Widget _buildAnimatedIndicator(int currentIndex) {
+  Widget _buildAnimatedIndicator(BuildContext context, int currentIndex) {
+    final appTheme = AppTheme.extensionOf(context);
+
     return AnimatedAlign(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOutCirc,
@@ -82,18 +100,16 @@ class MainShellView extends StatelessWidget {
         0,
       ),
       child: FractionallySizedBox(
-        widthFactor: 1 / 3, // Chia thanh bar làm 3 phần
+        widthFactor: 1 / 3,
         child: Container(
           height: 50,
           margin: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFFE0C3FC), Color(0xFF8EC5FC)],
-            ),
+            gradient: appTheme.navIndicatorGradient,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF8EC5FC).withOpacity(0.3),
+                color: appTheme.shadowColor,
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -104,8 +120,14 @@ class MainShellView extends StatelessWidget {
     );
   }
 
-// Item từng nút bấm
-  Widget _buildNavItem(BuildContext context, int index, IconData icon, String label, int currentIndex) {
+  Widget _buildNavItem(
+    BuildContext context,
+    int index,
+    IconData icon,
+    String label,
+    int currentIndex,
+  ) {
+    final appTheme = AppTheme.extensionOf(context);
     final bool isSelected = currentIndex == index;
 
     return Expanded(
@@ -120,13 +142,15 @@ class MainShellView extends StatelessWidget {
               scale: isSelected ? 1.1 : 1.0,
               child: Icon(
                 icon,
-                color: isSelected ? Colors.white : Colors.blueGrey.withOpacity(0.5),
+                color: isSelected
+                    ? appTheme.selectedIconColor
+                    : appTheme.unselectedIconColor,
                 size: 26,
               ),
             ),
             if (isSelected)
               const Text(
-                "", // Bạn có thể thêm label cực nhỏ ở đây nếu muốn
+                '',
                 style: TextStyle(fontSize: 0),
               ),
           ],
@@ -137,10 +161,15 @@ class MainShellView extends StatelessWidget {
 
   void _onItemTapped(int index, BuildContext context) {
     switch (index) {
-      case 0: context.go(AppRoutes.home); break;
-      case 1: context.go(AppRoutes.playList); break;
-      case 2: context.go(AppRoutes.setting); break;
+      case 0:
+        context.go(AppRoutes.home);
+        break;
+      case 1:
+        context.go(AppRoutes.playList);
+        break;
+      case 2:
+        context.go(AppRoutes.setting);
+        break;
     }
   }
-
 }

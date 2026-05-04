@@ -3,6 +3,7 @@ import 'package:musiclove/feature/storage/domain/repository/song_repository.dart
 import 'package:musiclove/shared/service/scan_service.dart';
 import 'package:musiclove/shared/widget/music_column_tile_widget.dart';
 import 'package:musiclove/shared/widget/music_row_tile_widget.dart';
+import 'core/constant/theme.dart';
 import 'core/model/mp3_file_model.dart';
 
 class HomeView extends StatefulWidget {
@@ -60,9 +61,15 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // backgroundColor: Colors.white,
-      body: SafeArea(
+    final appTheme = AppTheme.extensionOf(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: appTheme.backgroundGradient,
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
         child: ValueListenableBuilder<List<Mp3FileModel>>(
           valueListenable: _songsNotifier,
           builder: (context, currentSongs, _) {
@@ -86,20 +93,33 @@ class _HomeViewState extends State<HomeView> {
           },
         ),
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildHeader() {
+    final appTheme = AppTheme.extensionOf(context);
+
     return Padding(
       padding: const EdgeInsets.only(top: 20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Chào buổi sáng! 🌸", style: TextStyle(fontSize: 16, color: Colors.grey)),
-              Text("Bonah Music", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+              Text(
+                "Chào buổi sáng! 🌸",
+                style: TextStyle(fontSize: 16, color: appTheme.subtitleColor),
+              ),
+              Text(
+                "Bonah Music",
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: appTheme.textColor,
+                ),
+              ),
             ],
           ),
           // Nút SCAN được thiết kế style Chibi bo tròn
@@ -109,13 +129,13 @@ class _HomeViewState extends State<HomeView> {
               duration: const Duration(milliseconds: 300),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: _isScanning ? Colors.grey[300] : Colors.white,
+                color: _isScanning ? Theme.of(context).disabledColor : appTheme.cardBackground,
                 borderRadius: BorderRadius.circular(20),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+                boxShadow: [BoxShadow(color: appTheme.shadowColor, blurRadius: 10)],
               ),
               child: _isScanning
                   ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.sync_rounded, color: Colors.pinkAccent),
+                  : Icon(Icons.sync_rounded, color: appTheme.accentColor),
             ),
           )
         ],
@@ -124,7 +144,16 @@ class _HomeViewState extends State<HomeView> {
   }
 
   Widget _buildSectionTitle(String title) {
-    return Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold));
+    final appTheme = AppTheme.extensionOf(context);
+
+    return Text(
+      title,
+      style: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        color: appTheme.textColor,
+      ),
+    );
   }
 
   Widget _buildRecentList(List<Mp3FileModel> songs) {

@@ -22,6 +22,7 @@ class SettingRepository {
 
 class SettingKeys {
   static const String themeMode = 'themeMode';
+  static const String themeStyle = 'themeStyle';
 
   static const String autoPlayWhenHeadphoneConnected =
       'autoPlayWhenHeadphoneConnected';

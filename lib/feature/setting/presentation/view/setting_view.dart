@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:musiclove/core/constant/theme.dart';
 import 'package:musiclove/feature/setting/domain/repository/setting_repository.dart';
 
 class SettingView extends StatefulWidget {
@@ -12,6 +13,7 @@ class _SettingViewState extends State<SettingView> {
   final SettingRepository _repo = SettingRepository();
 
   late String _themeMode;
+  late String _themeStyle;
   late bool _autoPlayWhenHeadphoneConnected;
   late bool _pauseWhenHeadphoneDisconnected;
   late bool _showBluetoothDeviceName;
@@ -35,6 +37,11 @@ class _SettingViewState extends State<SettingView> {
     _themeMode = _repo.getString(
       SettingKeys.themeMode,
       defaultValue: 'system',
+    );
+
+    _themeStyle = _repo.getString(
+      SettingKeys.themeStyle,
+      defaultValue: AppThemePreset.musicLove.value,
     );
 
     _autoPlayWhenHeadphoneConnected = _repo.getBool(
@@ -96,6 +103,14 @@ class _SettingViewState extends State<SettingView> {
     });
   }
 
+  Future<void> _setThemeStyle(String value) async {
+    await _repo.setString(SettingKeys.themeStyle, value);
+
+    setState(() {
+      _themeStyle = value;
+    });
+  }
+
   Future<void> _setLibrarySortType(String value) async {
     await _repo.setString(SettingKeys.librarySortType, value);
 
@@ -146,33 +161,42 @@ class _SettingViewState extends State<SettingView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF7F7FA),
-      appBar: AppBar(
-        title: const Text(
-          'Cài đặt',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        centerTitle: false,
-        backgroundColor: const Color(0xFFF7F7FA),
-        elevation: 0,
+    final appTheme = AppTheme.extensionOf(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: appTheme.backgroundGradient,
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
-        children: [
-          _buildThemeSection(),
-          const SizedBox(height: 16),
-          _buildHeadphoneBluetoothSection(),
-          const SizedBox(height: 16),
-          _buildLibrarySection(),
-          const SizedBox(height: 16),
-          _buildPlayerSection(),
-        ],
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: const Text(
+            'Cài đặt',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          centerTitle: false,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+          children: [
+            _buildThemeSection(),
+            const SizedBox(height: 16),
+            _buildHeadphoneBluetoothSection(),
+            const SizedBox(height: 16),
+            _buildLibrarySection(),
+            const SizedBox(height: 16),
+            _buildPlayerSection(),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildThemeSection() {
+    final selectedPreset = AppTheme.presetFromString(_themeStyle);
+
     return _SettingCard(
       title: 'Chủ đề',
       icon: Icons.palette_outlined,
@@ -194,6 +218,15 @@ class _SettingViewState extends State<SettingView> {
           subtitle: 'Luôn dùng giao diện tối',
           selected: _themeMode == 'dark',
           onTap: () => _setThemeMode('dark'),
+        ),
+        const _SettingDivider(),
+        const _SettingSubTitle(title: 'Kiểu giao diện'),
+        ...AppThemePreset.values.map(
+          (preset) => _ThemePresetTile(
+            preset: preset,
+            selected: selectedPreset == preset,
+            onTap: () => _setThemeStyle(preset.value),
+          ),
         ),
       ],
     );
@@ -498,10 +531,19 @@ class _SettingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appTheme = AppTheme.extensionOf(context);
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: appTheme.cardBackground,
         borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: appTheme.shadowColor,
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -511,15 +553,14 @@ class _SettingCard extends StatelessWidget {
               children: [
                 Icon(
                   icon,
-                  color: Colors.pinkAccent,
+                  color: appTheme.accentColor,
                 ),
                 const SizedBox(width: 10),
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),
@@ -527,6 +568,103 @@ class _SettingCard extends StatelessWidget {
           ...children,
         ],
       ),
+    );
+  }
+}
+
+class _SettingSubTitle extends StatelessWidget {
+  const _SettingSubTitle({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final appTheme = AppTheme.extensionOf(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(18, 12, 18, 4),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          title,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: appTheme.accentColor,
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SettingDivider extends StatelessWidget {
+  const _SettingDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Divider(
+      height: 16,
+      indent: 18,
+      endIndent: 18,
+      color: Theme.of(context).dividerColor,
+    );
+  }
+}
+
+class _ThemePresetTile extends StatelessWidget {
+  const _ThemePresetTile({
+    required this.preset,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final AppThemePreset preset;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final appTheme = AppTheme.extensionOf(context);
+
+    return ListTile(
+      onTap: onTap,
+      leading: Container(
+        width: 46,
+        height: 46,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: preset.previewColors),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: selected ? appTheme.accentColor : Colors.transparent,
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: appTheme.shadowColor,
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Icon(
+          preset.icon,
+          color: selected ? appTheme.selectedIconColor : Colors.white,
+        ),
+      ),
+      title: Text(
+        preset.label,
+        style: const TextStyle(fontWeight: FontWeight.w600),
+      ),
+      subtitle: Text(preset.subtitle),
+      trailing: selected
+          ? Icon(
+              Icons.check_circle_rounded,
+              color: appTheme.accentColor,
+            )
+          : Icon(
+              Icons.circle_outlined,
+              color: appTheme.unselectedIconColor.withOpacity(0.45),
+            ),
     );
   }
 }
@@ -546,9 +684,11 @@ class _SwitchTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appTheme = AppTheme.extensionOf(context);
+
     return SwitchListTile(
       value: value,
-      activeColor: Colors.pinkAccent,
+      activeColor: appTheme.accentColor,
       title: Text(
         title,
         style: const TextStyle(fontWeight: FontWeight.w600),
@@ -574,6 +714,8 @@ class _OptionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appTheme = AppTheme.extensionOf(context);
+
     return ListTile(
       onTap: onTap,
       title: Text(
@@ -582,14 +724,14 @@ class _OptionTile extends StatelessWidget {
       ),
       subtitle: Text(subtitle),
       trailing: selected
-          ? const Icon(
-        Icons.check_circle_rounded,
-        color: Colors.pinkAccent,
-      )
-          : const Icon(
-        Icons.circle_outlined,
-        color: Colors.black26,
-      ),
+          ? Icon(
+              Icons.check_circle_rounded,
+              color: appTheme.accentColor,
+            )
+          : Icon(
+              Icons.circle_outlined,
+              color: appTheme.unselectedIconColor.withOpacity(0.45),
+            ),
     );
   }
 }
@@ -607,6 +749,8 @@ class _SelectTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appTheme = AppTheme.extensionOf(context);
+
     return ListTile(
       onTap: onTap,
       title: Text(
@@ -614,7 +758,10 @@ class _SelectTile extends StatelessWidget {
         style: const TextStyle(fontWeight: FontWeight.w600),
       ),
       subtitle: Text(subtitle),
-      trailing: const Icon(Icons.chevron_right_rounded),
+      trailing: Icon(
+        Icons.chevron_right_rounded,
+        color: appTheme.unselectedIconColor,
+      ),
     );
   }
 }
@@ -634,6 +781,8 @@ class _ActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appTheme = AppTheme.extensionOf(context);
+
     return ListTile(
       onTap: onTap,
       title: Text(
@@ -641,7 +790,10 @@ class _ActionTile extends StatelessWidget {
         style: const TextStyle(fontWeight: FontWeight.w600),
       ),
       subtitle: Text(subtitle),
-      trailing: Icon(icon),
+      trailing: Icon(
+        icon,
+        color: appTheme.accentColor,
+      ),
     );
   }
 }
@@ -659,14 +811,16 @@ class _BottomOptionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appTheme = AppTheme.extensionOf(context);
+
     return ListTile(
       onTap: onTap,
       title: Text(title),
       trailing: selected
-          ? const Icon(
-        Icons.check_circle_rounded,
-        color: Colors.pinkAccent,
-      )
+          ? Icon(
+              Icons.check_circle_rounded,
+              color: appTheme.accentColor,
+            )
           : null,
     );
   }

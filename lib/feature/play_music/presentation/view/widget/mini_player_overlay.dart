@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/constant/routes.dart';
+import '../../../../../core/constant/theme.dart';
 import '../../../../../core/provider/audio_handler_provider.dart';
 
 class MiniPlayerOverlay extends ConsumerWidget {
@@ -12,6 +13,7 @@ class MiniPlayerOverlay extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final audioHandler = ref.watch(audioHandlerProvider);
+    final appTheme = AppTheme.extensionOf(context);
 
     return StreamBuilder<MediaItem?>(
       stream: audioHandler.mediaItem,
@@ -38,11 +40,11 @@ class MiniPlayerOverlay extends ConsumerWidget {
                   height: 68,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: appTheme.cardBackground,
                     borderRadius: BorderRadius.circular(22),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
+                        color: appTheme.shadowColor,
                         blurRadius: 16,
                         offset: const Offset(0, 6),
                       ),
@@ -50,8 +52,12 @@ class MiniPlayerOverlay extends ConsumerWidget {
                   ),
                   child: Row(
                     children: [
-                      const CircleAvatar(
-                        child: Icon(Icons.music_note_rounded),
+                      CircleAvatar(
+                        backgroundColor: appTheme.softAccentColor.withOpacity(0.35),
+                        child: Icon(
+                          Icons.music_note_rounded,
+                          color: appTheme.accentColor,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -63,12 +69,16 @@ class MiniPlayerOverlay extends ConsumerWidget {
                               item.title,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: appTheme.textColor,
+                              ),
                             ),
                             Text(
                               item.artist ?? '',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
+                              style: TextStyle(color: appTheme.subtitleColor),
                             ),
                           ],
                         ),
@@ -82,6 +92,7 @@ class MiniPlayerOverlay extends ConsumerWidget {
                               ? Icons.pause_circle_filled_rounded
                               : Icons.play_circle_fill_rounded,
                           size: 36,
+                          color: appTheme.accentColor,
                         ),
                       ),
                     ],

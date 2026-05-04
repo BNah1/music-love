@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:musiclove/core/constant/app_enum.dart';
+import 'package:musiclove/core/constant/theme.dart';
 import 'package:musiclove/core/model/mp3_file_model.dart';
 import 'package:musiclove/core/provider/audio_handler_provider.dart';
 import 'package:musiclove/feature/play_music/presentation/view/widget/play_music_button_widget.dart';
@@ -333,15 +334,18 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
   Widget build(BuildContext context) {
     final audioHandler = ref.watch(audioHandlerProvider);
 
+    final appTheme = AppTheme.extensionOf(context);
+
     return Scaffold(
+      backgroundColor: appTheme.pageBackground,
       extendBodyBehindAppBar: true,
       appBar: _buildAppBar(widget.songId ?? widget.song?.id ?? '0'),
       body: Container(
         width: double.infinity,
         decoration: _buildBackgroundDecoration(),
         child: _isLoading
-            ? const Center(
-          child: CircularProgressIndicator(color: Colors.white),
+            ? Center(
+          child: CircularProgressIndicator(color: appTheme.selectedIconColor),
         )
             : _errorMessage != null
             ? _buildErrorView()
@@ -394,18 +398,18 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
       backgroundColor: Colors.transparent,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(
+        icon: Icon(
           Icons.keyboard_arrow_down_rounded,
-          color: Colors.white,
+          color: AppTheme.extensionOf(context).selectedIconColor,
           size: 35,
         ),
         onPressed: () => Navigator.pop(context),
       ),
       centerTitle: true,
-      title: const Text(
+      title: Text(
         'ĐANG PHÁT',
         style: TextStyle(
-          color: Colors.white,
+          color: AppTheme.extensionOf(context).selectedIconColor,
           fontSize: 13,
           fontWeight: FontWeight.bold,
           letterSpacing: 2,
@@ -415,28 +419,28 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
     );
   }
 
-  Widget _buildRemove(String songId){
+  Widget _buildRemove(String songId) {
     return InkWell(
-        onTap: () async {
-          final audioHandler = ref.read(audioHandlerProvider);
+      onTap: () async {
+        final audioHandler = ref.read(audioHandlerProvider);
 
-          if (audioHandler is MusicAudioHandler) {
-            await audioHandler.removeSongFromQueue(songId);
-          }
-        },
-        child: const Icon(Icons.remove_circle_outline));
+        if (audioHandler is MusicAudioHandler) {
+          await audioHandler.removeSongFromQueue(songId);
+        }
+      },
+      child: Icon(
+        Icons.remove_circle_outline,
+        color: AppTheme.extensionOf(context).selectedIconColor,
+      ),
+    );
   }
 
+
   BoxDecoration _buildBackgroundDecoration() {
-    return const BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          Color(0xFFE0C3FC),
-          Color(0xFF8EC5FC),
-        ],
-      ),
+    final appTheme = AppTheme.extensionOf(context);
+
+    return BoxDecoration(
+      gradient: appTheme.navIndicatorGradient,
     );
   }
 
@@ -447,17 +451,17 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.error_outline_rounded,
-              color: Colors.white,
+              color: AppTheme.extensionOf(context).selectedIconColor,
               size: 56,
             ),
             const SizedBox(height: 16),
             Text(
               _errorMessage ?? 'Có lỗi xảy ra',
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: AppTheme.extensionOf(context).selectedIconColor,
                 fontSize: 16,
                 height: 1.4,
               ),
@@ -474,16 +478,18 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
   }
 
   Widget _buildAlbumArt(bool isPlaying) {
+    final appTheme = AppTheme.extensionOf(context);
+
     return RotationTransition(
       turns: _animationController,
       child: Container(
         width: size.width * 0.75,
         height: size.width * 0.75,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
+          color: appTheme.selectedIconColor.withOpacity(0.2),
           shape: BoxShape.circle,
           border: Border.all(
-            color: Colors.white.withOpacity(0.3),
+            color: appTheme.selectedIconColor.withOpacity(0.3),
             width: 8,
           ),
         ),
@@ -492,11 +498,13 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
           child: ClipRRect(
             borderRadius: BorderRadius.circular(size.width),
             child: Container(
-              color: const Color(0xFFFDFCF0),
+              color: appTheme.cardBackground,
               child: Icon(
                 Icons.music_note_rounded,
                 size: 100,
-                color: isPlaying ? Colors.pinkAccent : Colors.grey[400],
+                color: isPlaying
+                    ? appTheme.accentColor
+                    : appTheme.unselectedIconColor,
               ),
             ),
           ),
@@ -521,10 +529,10 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: AppTheme.extensionOf(context).selectedIconColor,
               height: 1.2,
             ),
           ),
@@ -534,9 +542,11 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
-              color: Colors.white70,
+              color: AppTheme.extensionOf(context)
+                  .selectedIconColor
+                  .withOpacity(0.72),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -576,9 +586,11 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
               SliderTheme(
                 data: SliderTheme.of(context).copyWith(
                   trackHeight: 4,
-                  activeTrackColor: Colors.white,
-                  inactiveTrackColor: Colors.white.withOpacity(0.3),
-                  thumbColor: Colors.white,
+                  activeTrackColor: AppTheme.extensionOf(context).selectedIconColor,
+                  inactiveTrackColor: AppTheme.extensionOf(context)
+                      .selectedIconColor
+                      .withOpacity(0.3),
+                  thumbColor: AppTheme.extensionOf(context).selectedIconColor,
                   thumbShape: const RoundSliderThumbShape(
                     enabledThumbRadius: 6,
                   ),
@@ -616,15 +628,19 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
                   children: [
                     Text(
                       _formatDuration(displayPosition),
-                      style: const TextStyle(
-                        color: Colors.white70,
+                      style: TextStyle(
+                        color: AppTheme.extensionOf(context)
+                  .selectedIconColor
+                  .withOpacity(0.72),
                         fontSize: 12,
                       ),
                     ),
                     Text(
                       _formatDuration(safeDuration),
-                      style: const TextStyle(
-                        color: Colors.white70,
+                      style: TextStyle(
+                        color: AppTheme.extensionOf(context)
+                  .selectedIconColor
+                  .withOpacity(0.72),
                         fontSize: 12,
                       ),
                     ),
@@ -659,7 +675,9 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
             onTap: () => _toggleShuffle(shuffleMode),
             child: Icon(
               Icons.shuffle_rounded,
-              color: isShuffleEnabled ? Colors.pinkAccent : Colors.white54,
+              color: isShuffleEnabled
+                  ? AppTheme.extensionOf(context).accentColor
+                  : AppTheme.extensionOf(context).selectedIconColor.withOpacity(0.54),
               size: 24,
             ),
           ),
@@ -688,7 +706,9 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
               repeatMode == AudioServiceRepeatMode.one
                   ? Icons.repeat_one_rounded
                   : Icons.repeat_rounded,
-              color: isRepeatEnabled ? Colors.pinkAccent : Colors.white54,
+              color: isRepeatEnabled
+                  ? AppTheme.extensionOf(context).accentColor
+                  : AppTheme.extensionOf(context).selectedIconColor.withOpacity(0.54),
               size: 24,
             ),
           ),
