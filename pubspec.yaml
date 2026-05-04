@@ -12,14 +12,17 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   rive: any
-  flutter_bloc: ^9.1.1
-#  get_it: ^8.0.3
+  go_router: ^15.1.2
+
+  #  get_it: ^8.0.3
 #  uuid: ^4.0.0
 
   #UI design
   dotted_border: any
   flutter_svg: ^2.2.0
 
+  # state management
+  flutter_riverpod: ^2.3.7
 
   #Text support
   flutter_lints: ^2.0.0
@@ -28,13 +31,20 @@ dependencies:
   auto_size_text: ^3.0.0
 
   #audioplay
-  audioplayers: ^6.5.0
-
+  audioplayers: ^6.6.0
+  just_audio: ^0.10.5
+  audio_service: ^0.18.18
+  audio_session: ^0.2.2
+  audio_metadata_reader: ^1.6.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
 
   file_picker: ^10.2.0
-  permission_handler: ^10.4.0
+  permission_handler: ^12.0.1
   path_provider: ^2.1.2
 
+dependency_overrides:
+#  flutter_rust_bridge: 2.11.1
 
 dev_dependencies:
   flutter_test:

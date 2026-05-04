@@ -3,46 +3,49 @@ import 'package:flutter_svg/svg.dart';
 import 'package:musiclove/core/constant/app_enum.dart';
 import 'package:musiclove/core/constant/app_path.dart';
 
-class PlayMusicButtonWidget extends StatefulWidget {
-  const PlayMusicButtonWidget({super.key, required this.enumPlayMusic});
-
+class PlayMusicButtonWidget extends StatelessWidget {
   final EnumPlayMusic enumPlayMusic;
+  final bool isBigButton;
+  final VoidCallback? onTap;
 
-  @override
-  State<PlayMusicButtonWidget> createState() => _PlayMusicButtonWidgetState();
-}
+  const PlayMusicButtonWidget({
+    super.key,
+    required this.enumPlayMusic,
+    this.isBigButton = false,
+    this.onTap,
+  });
 
-class _PlayMusicButtonWidgetState extends State<PlayMusicButtonWidget> {
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final double buttonSize = isBigButton ? 70 : 50;
+
     return GestureDetector(
-      onTap: () {
-        getTap(widget.enumPlayMusic)();
-      },
-      child: SizedBox(
-          height: size.height/15,
-          width: size.height/15,
-          child: SvgPicture.asset(getPathSvg(widget.enumPlayMusic), color: Colors.white)),
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        height: buttonSize,
+        width: buttonSize,
+        padding: EdgeInsets.all(isBigButton ? 18 : 12),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.25),
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white30, width: 1.5),
+        ),
+        child: SvgPicture.asset(
+          _getPathSvg(enumPlayMusic),
+          colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+        ),
+      ),
     );
   }
-}
 
-Function getTap(EnumPlayMusic enumPlayMusic){
-  return (){
-    print(enumPlayMusic.name);
-  };
-}
-
-String getPathSvg(EnumPlayMusic enumPlayMusic){
-  switch(enumPlayMusic){
-    case EnumPlayMusic.next :
-      return AppPath.playMusicIcon[0];
-    case EnumPlayMusic.play:
-      return AppPath.playMusicIcon[3];
-    case EnumPlayMusic.back:
-      return AppPath.playMusicIcon[1];
-    case EnumPlayMusic.pause:
-      return AppPath.playMusicIcon[0];
+  String _getPathSvg(EnumPlayMusic type) {
+    switch (type) {
+      case EnumPlayMusic.next: return AppPath.playMusicIcon[0];
+      case EnumPlayMusic.back: return AppPath.playMusicIcon[1];
+      case EnumPlayMusic.pause: return AppPath.playMusicIcon[2];
+      case EnumPlayMusic.play: return AppPath.playMusicIcon[3];
+      default: return AppPath.playMusicIcon[3];
+    }
   }
 }
