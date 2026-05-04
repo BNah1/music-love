@@ -4,6 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:musiclove/feature/main_shell_view.dart';
 import 'package:musiclove/feature/playlist/presentation/view/playlist_detail_view.dart';
 import 'package:musiclove/feature/playlist/presentation/view/playlist_view.dart';
+import 'package:musiclove/feature/setting/presentation/view/setting_headphone_bluetooth_view.dart';
+import 'package:musiclove/feature/setting/presentation/view/setting_library_view.dart';
+import 'package:musiclove/feature/setting/presentation/view/setting_player_music_view.dart';
+import 'package:musiclove/feature/setting/presentation/view/setting_theme_view.dart';
 import 'package:musiclove/feature/setting/presentation/view/setting_view.dart';
 import 'package:musiclove/home_view.dart';
 import 'package:musiclove/feature/play_music/presentation/view/play_music_view.dart';
@@ -20,6 +24,10 @@ class AppRoutes {
   static const String playList = '/playList';
   static const String playMusic = '/playMusic';
   static const String setting = '/setting';
+  static const String settingTheme = '/settingTheme';
+  static const String settingBluetooth = '/settingBluetooth';
+  static const String settingLibrary = '/settingLibrary';
+  static const String settingMusicPlayer = '/settingMusicPlayer';
 
   // Khởi tạo GoRouter
   static final GoRouter router = GoRouter(
@@ -47,6 +55,27 @@ class AppRoutes {
           ),
 
         ],
+      ),
+
+
+      GoRoute(
+        path: settingMusicPlayer,
+        pageBuilder: (context, state) => const CupertinoPage(child: SettingPlayerMusicView()),
+      ),
+
+      GoRoute(
+        path: settingTheme,
+        pageBuilder: (context, state) => const CupertinoPage(child: SettingThemeView()),
+      ),
+
+      GoRoute(
+        path: settingBluetooth,
+        pageBuilder: (context, state) => const CupertinoPage(child: SettingHeadphoneBluetoothView()),
+      ),
+
+      GoRoute(
+        path: settingLibrary,
+        pageBuilder: (context, state) => const CupertinoPage(child: SettingLibraryView()),
       ),
 
       GoRoute(
