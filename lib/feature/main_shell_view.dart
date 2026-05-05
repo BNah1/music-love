@@ -13,7 +13,7 @@ class MainShellView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      extendBody: true,
       body: Stack(
         children: [
           navigationShell,
@@ -21,13 +21,11 @@ class MainShellView extends StatelessWidget {
             alignment: Alignment.bottomCenter,
             child: MiniPlayerOverlay(),
           ),
-          Positioned(
-            bottom: 10,
-            left: 10,
-            right: 10,
-            child: _buildBottomNav(context),
-          ),
         ],
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+        child: _buildBottomNav(context),
       ),
     );
   }

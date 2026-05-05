@@ -4,6 +4,8 @@ import 'package:musiclove/core/constant/app_enum.dart';
 import 'package:musiclove/core/constant/theme.dart';
 import 'package:musiclove/feature/home/presentation/provider/home_provider.dart';
 import 'package:musiclove/feature/home/presentation/state/home_state.dart';
+import 'package:musiclove/feature/home/presentation/view/widget/home_header_widget.dart';
+import 'package:musiclove/feature/home/presentation/view/widget/search_box_widget.dart';
 import 'package:musiclove/shared/entity/mp3_file_entity.dart';
 import 'package:musiclove/shared/widget/music_column_tile_widget.dart';
 import 'package:musiclove/shared/widget/music_row_tile_widget.dart';
@@ -29,6 +31,8 @@ class HomeView extends ConsumerWidget {
             state: state,
             onScanPressed: notifier.scanSongs,
             onRetryPressed: notifier.loadSongs,
+            onSearchChanged: notifier.searchSongs,
+            onClearSearch: notifier.clearSearch, onSearchPressed: notifier.pressSearch,
           ),
         ),
       ),
@@ -39,9 +43,12 @@ class HomeView extends ConsumerWidget {
     required BuildContext context,
     required HomeState state,
     required VoidCallback onScanPressed,
+    required VoidCallback onSearchPressed,
     required VoidCallback onRetryPressed,
+    required ValueChanged<String> onSearchChanged,
+    required VoidCallback onClearSearch,
   }) {
-    if (state.status == BaseStatus.loading) {
+    if (state.status == BaseStatus.loading && state.songs.isEmpty) {
       return const Center(
         child: CircularProgressIndicator(),
       );
@@ -55,23 +62,46 @@ class HomeView extends ConsumerWidget {
       );
     }
 
+    final songsToShow = state.filteredSongs;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _HomeHeader(
+          HomeHeader(
             isScanning: state.isScanning,
-            onScanPressed: onScanPressed,
+            onScanPressed: onScanPressed, isSearch: state.isSearch, onSearchPressed: onSearchPressed,
           ),
+
+          const SizedBox(height: 20),
+
+          if(state.isSearch)SearchMusicBox(
+            query: state.searchQuery,
+            onChanged: onSearchChanged,
+            onClear: onClearSearch,
+          ),
+
+          const SizedBox(height: 25),
+
+          if (state.isSearching) ...[
+            _SectionTitle(
+              title: 'Kết quả tìm kiếm (${songsToShow.length})',
+            ),
+            const SizedBox(height: 10),
+            _SearchResultList(
+              songs: songsToShow,
+            ),
+          ] else ...[
+            const _SectionTitle(title: 'Gần đây'),
+            const SizedBox(height: 15),
+            _RecentList(songs: state.songs),
+            const SizedBox(height: 30),
+            const _SectionTitle(title: 'Tất cả bài hát'),
+            _SuggestionList(songs: state.songs),
+          ],
+
           const SizedBox(height: 30),
-          const _SectionTitle(title: 'Gần đây'),
-          const SizedBox(height: 15),
-          _RecentList(songs: state.songs),
-          const SizedBox(height: 30),
-          const _SectionTitle(title: 'Tất cả bài hát'),
-          _SuggestionList(songs: state.songs),
-          const SizedBox(height: 100),
         ],
       ),
     );
@@ -117,80 +147,6 @@ class HomeView extends ConsumerWidget {
   }
 }
 
-class _HomeHeader extends StatelessWidget {
-  final bool isScanning;
-  final VoidCallback onScanPressed;
-
-  const _HomeHeader({
-    required this.isScanning,
-    required this.onScanPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final appTheme = AppTheme.extensionOf(context);
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Chào buổi sáng! 🌸',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: appTheme.subtitleColor,
-                ),
-              ),
-              Text(
-                'Bonah Music',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: appTheme.textColor,
-                ),
-              ),
-            ],
-          ),
-          GestureDetector(
-            onTap: isScanning ? null : onScanPressed,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isScanning
-                    ? Theme.of(context).disabledColor
-                    : appTheme.cardBackground,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: appTheme.shadowColor,
-                    blurRadius: 10,
-                  ),
-                ],
-              ),
-              child: isScanning
-                  ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                ),
-              )
-                  : Icon(
-                Icons.sync_rounded,
-                color: appTheme.accentColor,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _SectionTitle extends StatelessWidget {
   final String title;
@@ -256,6 +212,37 @@ class _SuggestionList extends StatelessWidget {
         padding: EdgeInsets.only(top: 50),
         child: Center(
           child: Text('Hãy bấm scan để tìm nhạc'),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: songs.length,
+      itemBuilder: (context, index) {
+        return MusicColumnTileWidget(
+          song: songs[index],
+        );
+      },
+    );
+  }
+}
+
+class _SearchResultList extends StatelessWidget {
+  final List<Mp3FileEntity> songs;
+
+  const _SearchResultList({
+    required this.songs,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (songs.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 40),
+        child: Center(
+          child: Text('Không tìm thấy bài hát phù hợp'),
         ),
       );
     }

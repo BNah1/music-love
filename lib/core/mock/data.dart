@@ -1,5 +1,0 @@
-class MockData {
-
-
-  MockData._();
-}

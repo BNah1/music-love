@@ -35,6 +35,25 @@ class HomeNotifier extends StateNotifier<HomeState>{
 
   }
 
+  void searchSongs(String keyword) {
+    state = state.copyWith(
+      searchQuery: keyword,
+    );
+  }
+
+
+  void pressSearch() {
+    state = state.copyWith(
+      isSearch: !state.isSearch,
+    );
+  }
+
+  void clearSearch() {
+    state = state.copyWith(
+      searchQuery: '',
+    );
+  }
+
   Future<void> scanSongs() async{
     if(state.isScanning) return;
 
