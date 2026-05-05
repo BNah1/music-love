@@ -25,8 +25,7 @@ extension AppThemePresetX on AppThemePreset {
       case AppThemePreset.neon:
         return 'neon';
       case AppThemePreset.musicLove:
-      default:
-        return 'musicLove';
+      return 'musicLove';
     }
   }
 
@@ -43,8 +42,7 @@ extension AppThemePresetX on AppThemePreset {
       case AppThemePreset.neon:
         return 'Neon';
       case AppThemePreset.musicLove:
-      default:
-        return 'Music Love';
+      return 'Music Love';
     }
   }
 
@@ -61,8 +59,7 @@ extension AppThemePresetX on AppThemePreset {
       case AppThemePreset.neon:
         return 'Đậm, nổi bật, cyber vibe';
       case AppThemePreset.musicLove:
-      default:
-        return 'Hồng nhẹ mặc định của app';
+      return 'Hồng nhẹ mặc định của app';
     }
   }
 
@@ -79,8 +76,7 @@ extension AppThemePresetX on AppThemePreset {
       case AppThemePreset.neon:
         return Icons.bolt_rounded;
       case AppThemePreset.musicLove:
-      default:
-        return Icons.favorite_rounded;
+      return Icons.favorite_rounded;
     }
   }
 
@@ -97,8 +93,7 @@ extension AppThemePresetX on AppThemePreset {
       case AppThemePreset.neon:
         return const [Color(0xFFFF00CC), Color(0xFF00F5FF)];
       case AppThemePreset.musicLove:
-      default:
-        return const [Color(0xFFFFDEE9), Color(0xFFB5FFFC)];
+      return const [Color(0xFFFFDEE9), Color(0xFFB5FFFC)];
     }
   }
 }
@@ -605,8 +600,7 @@ class AppTheme {
           shadowColor: const Color(0xFFFF00CC).withOpacity(isDark ? 0.26 : 0.18),
         );
       case AppThemePreset.musicLove:
-      default:
-        return AppThemeExtension(
+      return AppThemeExtension(
           preset: preset,
           backgroundGradient: LinearGradient(
             begin: Alignment.topLeft,

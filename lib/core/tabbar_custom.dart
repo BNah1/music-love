@@ -43,8 +43,8 @@
 //   @override
 //   void initState() {
 //     super.initState();
-//     pageController = widget.pageController ?? PageController();
-//     offsetPageController = widget.offset ?? 0.0;
+//     pageController = view.pageController ?? PageController();
+//     offsetPageController = view.offset ?? 0.0;
 //     pageController.addListener(() {
 //       if (mounted) {
 //         setState(() {
@@ -84,7 +84,7 @@
 //   Widget build(BuildContext context) {
 //     double widthScreen = MediaQuery.of(context).size.width;
 //     return Scaffold(
-//       backgroundColor: widget.backgroundColor ?? BHXHThemePrimary.primaryColor,
+//       backgroundColor: view.backgroundColor ?? BHXHThemePrimary.primaryColor,
 //       body: Stack(
 //         children: [
 //           Positioned(
@@ -92,13 +92,13 @@
 //               width: widthScreen,
 //               height: 66,
 //               child: Row(
-//                 children: widget.listTitleName
+//                 children: view.listTitleName
 //                     .map((e) => Expanded(
 //                     child: Center(
 //                         child: Text(
 //                           e.tr,
 //                           style: TextStyle(
-//                               color: widget.disable
+//                               color: view.disable
 //                                   ? const Color(0xffEBEBEB).withOpacity(0.5)
 //                                   : const Color(0xffEBEBEB),
 //                               fontWeight: FontWeight.bold),
@@ -110,11 +110,11 @@
 //           CustomPaint(
 //             painter: ClipperBorderShadow(
 //                 offset: offsetPageController,
-//                 countPage: widget.listTitleName.length),
+//                 countPage: view.listTitleName.length),
 //             child: ClipPath(
 //               clipper: TabClipper(
 //                   offset: offsetPageController,
-//                   countPage: widget.listTitleName.length),
+//                   countPage: view.listTitleName.length),
 //               child: Container(
 //                 color: Colors.white,
 //                 child: Stack(
@@ -122,29 +122,29 @@
 //                     Column(
 //                       crossAxisAlignment: CrossAxisAlignment.start,
 //                       children: [
-//                         if (widget.bottomAppbarWidget != null) ...[
+//                         if (view.bottomAppbarWidget != null) ...[
 //                           Container(
 //                               margin: const EdgeInsets.only(top: 60),
-//                               child: widget.bottomAppbarWidget),
+//                               child: view.bottomAppbarWidget),
 //                           const SizedBox(
 //                             height: 10,
 //                           ),
 //                         ],
-//                         if (widget.bottomAppbarWidget == null)
+//                         if (view.bottomAppbarWidget == null)
 //                           SizedBox(
 //                             height: 70,
 //                           ),
 //                         Expanded(
 //                           child: PageView.builder(
-//                               physics: widget.disable
+//                               physics: view.disable
 //                                   ? const NeverScrollableScrollPhysics()
 //                                   : null,
 //                               controller: pageController,
-//                               onPageChanged: widget.onPageChanged,
-//                               itemCount: widget.listTitleName.length,
+//                               onPageChanged: view.onPageChanged,
+//                               itemCount: view.listTitleName.length,
 //                               itemBuilder: (context, index) {
 //                                 return KeepAliveWrapperWidget(
-//                                     child: widget.listBody[index]);
+//                                     child: view.listBody[index]);
 //                               }),
 //                         )
 //                       ],
@@ -156,16 +156,16 @@
 //                         // color: Colors.black87,
 //                         child: Row(
 //                           // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//                             children: widget.listTitleName
+//                             children: view.listTitleName
 //                                 .map((e) => Expanded(
 //                                 child: Center(
 //                                     child: Text(
 //                                       e.tr,
 //                                       style: TextStyle(
-//                                           color: widget.disable
+//                                           color: view.disable
 //                                               ? BHXHThemePrimary.primaryColor
 //                                               .withOpacity(0.5)
-//                                               : widget.titleColor ??
+//                                               : view.titleColor ??
 //                                               BHXHThemePrimary.primaryColor,
 //                                           fontWeight: FontWeight.bold),
 //                                     ))))
@@ -186,16 +186,16 @@
 //                 padding: const EdgeInsets.only(top: 8),
 //                 child: Row(
 //                   // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//                     children: widget.listTitleName
+//                     children: view.listTitleName
 //                         .map((e) => Expanded(
 //                         child: InkWell(
 //                           borderRadius: BorderRadius.circular(16.0),
 //                           onTap: () {
-//                             if (!widget.disable) {
+//                             if (!view.disable) {
 //                               int _indexSelected =
-//                               widget.listTitleName.indexOf(e);
-//                               if (widget.onCallBackUpdate != null) {
-//                                 widget.onCallBackUpdate(
+//                               view.listTitleName.indexOf(e);
+//                               if (view.onCallBackUpdate != null) {
+//                                 view.onCallBackUpdate(
 //                                     _indexSelected, offsetPageController);
 //                               }
 //                               pageController.animateToPage(_indexSelected,
@@ -371,7 +371,7 @@
 //   @override
 //   Widget build(BuildContext context) {
 //     super.build(context);
-//     return widget.child;
+//     return view.child;
 //   }
 //
 //   @override

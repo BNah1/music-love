@@ -9,10 +9,19 @@ import 'package:musiclove/feature/setting/presentation/view/setting_library_view
 import 'package:musiclove/feature/setting/presentation/view/setting_player_music_view.dart';
 import 'package:musiclove/feature/setting/presentation/view/setting_theme_view.dart';
 import 'package:musiclove/feature/setting/presentation/view/setting_view.dart';
-import 'package:musiclove/home_view.dart';
+import 'package:musiclove/feature/home/presentation/view/home_view.dart';
 import 'package:musiclove/feature/play_music/presentation/view/play_music_view.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
+
+final GlobalKey<NavigatorState> homeNavigatorKey =
+GlobalKey<NavigatorState>(debugLabel: 'home');
+
+final GlobalKey<NavigatorState> playlistNavigatorKey =
+GlobalKey<NavigatorState>(debugLabel: 'playlist');
+
+final GlobalKey<NavigatorState> settingNavigatorKey =
+GlobalKey<NavigatorState>(debugLabel: 'setting');
 
 class AppRoutes {
 
@@ -36,24 +45,54 @@ class AppRoutes {
     navigatorKey: rootNavigatorKey,
     errorBuilder: (context, state) => _errorRoute(state),
     routes: [
-      ShellRoute(
-        builder: (context, state, child) {
-          return MainShellView(child: child);
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return MainShellView(
+            navigationShell: navigationShell,
+          );
         },
-        routes: [
-          GoRoute(
-            path: home, // Dashboard
-            pageBuilder: (context, state) => const CupertinoPage(child: HomeView()),
-          ),
-          GoRoute(
-            path: playList,
-            pageBuilder: (context, state) => const CupertinoPage(child: PlaylistView()),
-          ),
-          GoRoute(
-            path: setting,
-            pageBuilder: (context, state) => const CupertinoPage(child: SettingView()),
+        branches: [
+          StatefulShellBranch(
+            navigatorKey: homeNavigatorKey,
+            routes: [
+              GoRoute(
+                path: home,
+                pageBuilder: (context, state) {
+                  return const CupertinoPage(
+                    child: HomeView(),
+                  );
+                },
+              ),
+            ],
           ),
 
+          StatefulShellBranch(
+            navigatorKey: playlistNavigatorKey,
+            routes: [
+              GoRoute(
+                path: playList,
+                pageBuilder: (context, state) {
+                  return const CupertinoPage(
+                    child: PlaylistView(),
+                  );
+                },
+              ),
+            ],
+          ),
+
+          StatefulShellBranch(
+            navigatorKey: settingNavigatorKey,
+            routes: [
+              GoRoute(
+                path: setting,
+                pageBuilder: (context, state) {
+                  return const CupertinoPage(
+                    child: SettingView(),
+                  );
+                },
+              ),
+            ],
+          ),
         ],
       ),
 

@@ -6,9 +6,9 @@ import '../core/constant/routes.dart';
 import '../core/constant/theme.dart';
 
 class MainShellView extends StatelessWidget {
-  const MainShellView({super.key, required this.child});
+  const MainShellView({super.key, required this.navigationShell});
 
-  final Widget child;
+  final StatefulNavigationShell navigationShell;
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +16,7 @@ class MainShellView extends StatelessWidget {
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          child,
+          navigationShell,
           const Align(
             alignment: Alignment.bottomCenter,
             child: MiniPlayerOverlay(),

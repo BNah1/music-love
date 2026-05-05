@@ -57,8 +57,6 @@ class PlayMusicButtonWidget extends StatelessWidget {
         return AppPath.playMusicIcon[2];
       case EnumPlayMusic.play:
         return AppPath.playMusicIcon[3];
-      default:
-        return AppPath.playMusicIcon[3];
-    }
+      }
   }
 }

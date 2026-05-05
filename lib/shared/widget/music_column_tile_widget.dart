@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:musiclove/core/constant/routes.dart';
 import 'package:musiclove/core/constant/theme.dart';
-import 'package:musiclove/core/model/mp3_file_model.dart';
+import 'package:musiclove/shared/entity/mp3_file_entity.dart';
 
 import 'more_vert_widget.dart';
 
@@ -14,7 +14,7 @@ class MusicColumnTileWidget extends StatelessWidget {
     this.onChanged,
   });
 
-  final Mp3FileModel song;
+  final Mp3FileEntity song;
   final String? currentPlaylistId;
   final VoidCallback? onChanged;
 

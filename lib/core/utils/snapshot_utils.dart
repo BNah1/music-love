@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:musiclove/core/constant/app_enum.dart';
-import 'package:musiclove/core/model/base_state.dart';
+import 'package:musiclove/core/state/base_state.dart';
 import 'package:musiclove/core/widget/loader_widget.dart';
 
 

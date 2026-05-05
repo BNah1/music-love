@@ -1,7 +1,7 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:musiclove/core/model/mp3_file_model.dart';
+import 'package:musiclove/shared/entity/mp3_file_entity.dart';
 
-extension Mp3MediaItemExtension on Mp3FileModel {
+extension Mp3MediaItemExtension on Mp3FileEntity {
   MediaItem toMediaItem() {
     return MediaItem(
       id: id,

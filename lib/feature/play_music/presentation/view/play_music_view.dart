@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:musiclove/core/constant/app_enum.dart';
 import 'package:musiclove/core/constant/theme.dart';
-import 'package:musiclove/core/model/mp3_file_model.dart';
+import 'package:musiclove/feature/library/data/model/mp3_file_model.dart';
 import 'package:musiclove/core/provider/audio_handler_provider.dart';
 import 'package:musiclove/feature/play_music/presentation/view/widget/play_music_button_widget.dart';
 
@@ -577,7 +577,7 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
 
         final sliderValue = displayPosition.inMilliseconds
             .toDouble()
-            .clamp(0.0, maxValue) as double;
+            .clamp(0.0, maxValue);
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30),

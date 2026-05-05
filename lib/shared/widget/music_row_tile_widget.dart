@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:musiclove/core/constant/routes.dart';
 import 'package:musiclove/core/constant/theme.dart';
-import 'package:musiclove/core/model/mp3_file_model.dart';
+import 'package:musiclove/shared/entity/mp3_file_entity.dart';
 
 class MusicRowTileWidget extends StatelessWidget {
   const MusicRowTileWidget({super.key, required this.song});
 
-  final Mp3FileModel song;
+  final Mp3FileEntity song;
 
   @override
   Widget build(BuildContext context) {

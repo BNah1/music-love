@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:musiclove/core/model/mp3_file_model.dart';
-import 'package:musiclove/feature/storage/domain/repository/playlist_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:musiclove/feature/playlist/presentation/provider/playlist_provider.dart';
+import 'package:musiclove/shared/entity/mp3_file_entity.dart';
 
-class MoreVertWidget extends StatelessWidget {
+class MoreVertWidget extends ConsumerWidget  {
   const MoreVertWidget({
     super.key,
     required this.song,
@@ -11,7 +12,7 @@ class MoreVertWidget extends StatelessWidget {
     this.onRemoveFromAudioHandler,
   });
 
-  final Mp3FileModel song;
+  final Mp3FileEntity song;
 
   /// Có giá trị khi đang ở PlaylistDetailView.
   final String? currentPlaylistId;
@@ -23,33 +24,34 @@ class MoreVertWidget extends StatelessWidget {
   final Future<void> Function(String songId)? onRemoveFromAudioHandler;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+
     return PopupMenuButton<_MusicAction>(
       icon: const Icon(Icons.more_vert_rounded),
       onSelected: (action) async {
         switch (action) {
           case _MusicAction.addToPlaylist:
-            await _showSelectPlaylistDialog(context);
+            await _showSelectPlaylistDialog(context: context, ref: ref);
             break;
 
           case _MusicAction.moveToTop:
-            await _moveToTop(context);
+            await _moveToTop(ref);
             break;
 
           case _MusicAction.moveUp:
-            await _moveUp(context);
+            await _moveUp(ref);
             break;
 
           case _MusicAction.moveDown:
-            await _moveDown(context);
+            await _moveDown(ref);
             break;
 
           case _MusicAction.moveToBottom:
-            await _moveToBottom(context);
+            await _moveToBottom(ref);
             break;
 
           case _MusicAction.removeFromPlaylist:
-            await _removeFromPlaylist(context);
+            await _removeFromPlaylist(context: context, ref: ref);
             break;
         }
       },
@@ -138,9 +140,13 @@ class MoreVertWidget extends StatelessWidget {
     );
   }
 
-  Future<void> _showSelectPlaylistDialog(BuildContext context) async {
-    final repo = PlaylistRepository();
-    final playlists = repo.getAllPlaylists();
+  Future<void> _showSelectPlaylistDialog({
+    required BuildContext context,
+    required WidgetRef ref,
+  }) async {
+    final notifier = ref.read(playlistProvider.notifier);
+    await notifier.loadPlaylists();
+    final playlists = ref.watch(playlistProvider).playlists;
 
     if (playlists.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -170,7 +176,7 @@ class MoreVertWidget extends StatelessWidget {
                 title: Text(playlist.name),
                 subtitle: Text('${playlist.songIds.length} bài hát'),
                 onTap: () async {
-                  await repo.addSongToPlaylist(
+                  await notifier.addSongToPlaylist(
                     playlistId: playlist.id,
                     songId: song.id,
                   );
@@ -195,11 +201,11 @@ class MoreVertWidget extends StatelessWidget {
     );
   }
 
-  Future<void> _moveToTop(BuildContext context) async {
+  Future<void> _moveToTop(WidgetRef ref) async {
     final playlistId = currentPlaylistId;
     if (playlistId == null) return;
 
-    await PlaylistRepository().moveSongToTop(
+    await ref.read(playlistProvider.notifier).moveSongToTop(
       playlistId: playlistId,
       songId: song.id,
     );
@@ -207,11 +213,11 @@ class MoreVertWidget extends StatelessWidget {
     onChanged?.call();
   }
 
-  Future<void> _moveUp(BuildContext context) async {
+  Future<void> _moveUp(WidgetRef ref) async {
     final playlistId = currentPlaylistId;
     if (playlistId == null) return;
 
-    await PlaylistRepository().moveSongUp(
+    await ref.read(playlistProvider.notifier).moveSongUp(
       playlistId: playlistId,
       songId: song.id,
     );
@@ -219,11 +225,11 @@ class MoreVertWidget extends StatelessWidget {
     onChanged?.call();
   }
 
-  Future<void> _moveDown(BuildContext context) async {
+  Future<void> _moveDown(WidgetRef ref) async {
     final playlistId = currentPlaylistId;
     if (playlistId == null) return;
 
-    await PlaylistRepository().moveSongDown(
+    await ref.read(playlistProvider.notifier).moveSongDown(
       playlistId: playlistId,
       songId: song.id,
     );
@@ -231,11 +237,11 @@ class MoreVertWidget extends StatelessWidget {
     onChanged?.call();
   }
 
-  Future<void> _moveToBottom(BuildContext context) async {
+  Future<void> _moveToBottom(WidgetRef ref) async {
     final playlistId = currentPlaylistId;
     if (playlistId == null) return;
 
-    await PlaylistRepository().moveSongToBottom(
+    await ref.read(playlistProvider.notifier).moveSongToBottom(
       playlistId: playlistId,
       songId: song.id,
     );
@@ -243,11 +249,14 @@ class MoreVertWidget extends StatelessWidget {
     onChanged?.call();
   }
 
-  Future<void> _removeFromPlaylist(BuildContext context) async {
+  Future<void> _removeFromPlaylist({
+    required BuildContext context,
+    required WidgetRef ref,
+  }) async {
     final playlistId = currentPlaylistId;
     if (playlistId == null) return;
 
-    await PlaylistRepository().removeSongFromPlaylist(
+    await ref.read(playlistProvider.notifier).removeSongFromPlaylist(
       playlistId: playlistId,
       songId: song.id,
     );

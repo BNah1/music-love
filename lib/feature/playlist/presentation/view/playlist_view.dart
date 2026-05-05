@@ -1,73 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:musiclove/core/constant/routes.dart';
 import 'package:musiclove/core/constant/theme.dart';
-import 'package:musiclove/feature/storage/data/model/playlist_model.dart';
-import 'package:musiclove/feature/storage/domain/repository/playlist_repository.dart';
+import 'package:musiclove/feature/playlist/presentation/provider/playlist_provider.dart';
+import 'package:musiclove/feature/playlist/presentation/view/widget/edit_playlist_widget.dart';
 
-class PlaylistView extends StatefulWidget {
+class PlaylistView extends ConsumerWidget {
   const PlaylistView({super.key});
 
-  @override
-  State<PlaylistView> createState() => _PlaylistViewState();
-}
 
-class _PlaylistViewState extends State<PlaylistView> {
-  final _repo = PlaylistRepository();
 
-  List<PlaylistModel> _playlists = [];
 
   @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  void _load() {
-    _playlists = _repo.getAllPlaylists();
-    setState(() {});
-  }
-
-  Future<void> _createPlaylist() async {
-    final controller = TextEditingController();
-
-    await showDialog(
-      context: context,
-      builder: (toastContext) => AlertDialog(
-        title: const Text('Tạo playlist'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            hintText: 'Tên playlist',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(toastContext),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final name = controller.text.trim();
-              if (name.isEmpty) return;
-
-              await _repo.createPlaylist(name);
-
-              if (toastContext.mounted) {
-                Navigator.pop(toastContext);
-                _load();
-              }
-            },
-            child: const Text('Tạo'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final appTheme = AppTheme.extensionOf(context);
+    final state = ref.watch(playlistProvider);
+    final notifier = ref.read(playlistProvider.notifier);
+    final playlists = state.playlists;
+
+
+    Future<void> createPlaylist() async {
+      final controller = TextEditingController();
+
+      await showDialog(
+        context: context,
+        builder: (toastContext) => AlertDialog(
+          title: const Text('Tạo playlist'),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(
+              hintText: 'Tên playlist',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(toastContext),
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final name = controller.text.trim();
+                if (name.isEmpty) return;
+
+                await notifier.createPlaylist(name);
+
+                if (toastContext.mounted) {
+                  Navigator.pop(toastContext);
+                }
+              },
+              child: const Text('Tạo'),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Container(
       decoration: BoxDecoration(
@@ -79,7 +66,7 @@ class _PlaylistViewState extends State<PlaylistView> {
           backgroundColor: Colors.transparent,
           actions: [
             InkWell(
-              onTap: _createPlaylist,
+              onTap: createPlaylist,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Icon(Icons.add, color: appTheme.accentColor),
@@ -88,7 +75,7 @@ class _PlaylistViewState extends State<PlaylistView> {
           ],
           title: const Text('Playlist'),
         ),
-        body: _playlists.isEmpty
+        body: playlists.isEmpty
             ? Center(
                 child: Text(
                   'Chưa có playlist',
@@ -97,9 +84,9 @@ class _PlaylistViewState extends State<PlaylistView> {
               )
             : ListView.builder(
                 padding: const EdgeInsets.only(bottom: 110),
-                itemCount: _playlists.length,
+                itemCount: playlists.length,
                 itemBuilder: (_, index) {
-                  final p = _playlists[index];
+                  final p = playlists[index];
 
                   return ListTile(
                     leading: Icon(
@@ -116,6 +103,9 @@ class _PlaylistViewState extends State<PlaylistView> {
                     subtitle: Text(
                       '${p.songIds.length} bài hát',
                       style: TextStyle(color: appTheme.subtitleColor),
+                    ),
+                    trailing: EditPlaylistWidget(
+                      playlist: p,
                     ),
                     onTap: () {
                       context.push(AppRoutes.playlistDetail(p.id));

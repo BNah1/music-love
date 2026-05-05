@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:musiclove/core/constant/theme.dart';
-import 'package:musiclove/core/model/mp3_file_model.dart';
-import 'package:musiclove/feature/storage/data/model/playlist_model.dart';
-import 'package:musiclove/feature/storage/domain/repository/playlist_repository.dart';
+import 'package:musiclove/feature/playlist/presentation/provider/playlist_provider.dart';
+import 'package:musiclove/feature/playlist/presentation/view/widget/edit_playlist_widget.dart';
 import 'package:musiclove/shared/widget/music_column_tile_widget.dart';
 
-class PlaylistDetailView extends StatefulWidget {
+class PlaylistDetailView extends ConsumerStatefulWidget {
   final String playlistId;
 
   const PlaylistDetailView({
@@ -15,14 +14,11 @@ class PlaylistDetailView extends StatefulWidget {
   });
 
   @override
-  State<PlaylistDetailView> createState() => _PlaylistDetailViewState();
+  ConsumerState<PlaylistDetailView> createState() => _PlaylistDetailViewState();
 }
 
-class _PlaylistDetailViewState extends State<PlaylistDetailView> {
-  final _repo = PlaylistRepository();
+class _PlaylistDetailViewState extends ConsumerState<PlaylistDetailView> {
 
-  PlaylistModel? _playlist;
-  List<Mp3FileModel> _songs = [];
 
   @override
   void initState() {
@@ -30,35 +26,18 @@ class _PlaylistDetailViewState extends State<PlaylistDetailView> {
     _load();
   }
 
-  void _load() {
-    final data = _repo.box.get(widget.playlistId);
-    if (data == null) return;
-
-    _playlist = PlaylistModel.fromMap(
-      Map<String, dynamic>.from(data),
-    );
-
-    final songBox = Hive.box('songs');
-
-    _songs = _playlist!.songIds
-        .map((id) {
-          final s = songBox.get(id);
-          if (s == null) return null;
-          return Mp3FileModel.fromMap(
-            Map<String, dynamic>.from(s),
-          );
-        })
-        .whereType<Mp3FileModel>()
-        .toList();
-
-    setState(() {});
+  Future<void> _load() async {
+    final notifier = ref.read(playlistProvider.notifier);
+    await notifier.getDetailPlaylistById(widget.playlistId);
   }
 
   @override
   Widget build(BuildContext context) {
     final appTheme = AppTheme.extensionOf(context);
+    final state = ref.watch(playlistProvider);
+    final detail = state.currentPlaylist;
 
-    if (_playlist == null) {
+    if (detail == null) {
       return Container(
         decoration: BoxDecoration(
           gradient: appTheme.backgroundGradient,
@@ -82,29 +61,43 @@ class _PlaylistDetailViewState extends State<PlaylistDetailView> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
+          actions: [
+            EditPlaylistWidget(
+              playlist: detail.playlist,
+              onDeleted: () {
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+              },
+              onRenamed: _load,
+            ),
+          ],
           backgroundColor: Colors.transparent,
-          title: Text(_playlist!.name),
+          title: Text(detail.playlist.name),
         ),
-        body: _songs.isEmpty
+        body: detail.songs.isEmpty
             ? Center(
                 child: Text(
                   'Chưa có bài hát',
                   style: TextStyle(color: appTheme.subtitleColor),
                 ),
               )
-            : ListView.builder(
-                padding: const EdgeInsets.only(bottom: 110),
-                itemCount: _songs.length,
-                itemBuilder: (_, index) {
-                  final song = _songs[index];
+            : Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 110),
+                  itemCount: detail.songs.length,
+                  itemBuilder: (_, index) {
+                    final song = detail.songs[index];
 
-                  return MusicColumnTileWidget(
-                    song: song,
-                    currentPlaylistId: _playlist!.id,
-                    onChanged: _load,
-                  );
-                },
-              ),
+                    return MusicColumnTileWidget(
+                      song: song,
+                      currentPlaylistId: detail.playlist.id,
+                      onChanged: _load,
+                    );
+                  },
+                ),
+            ),
       ),
     );
   }

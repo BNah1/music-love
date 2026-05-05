@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:audio_metadata_reader/audio_metadata_reader.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:musiclove/core/model/mp3_file_model.dart';
+import 'package:musiclove/feature/library/data/model/mp3_file_model.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class MusicScannerService {
@@ -13,7 +13,7 @@ class MusicScannerService {
     if (!hasPermission) return [];
 
     debugPrint("===> [START SCAN] Đang bắt đầu...");
-    final rootDir = Directory('/storage/emulated/0/');
+    final rootDir = Directory('/library/emulated/0/');
 
     // Kiểm tra quyền thủ công trước khi quét
 
