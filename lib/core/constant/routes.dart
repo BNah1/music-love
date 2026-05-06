@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:musiclove/feature/main_shell_view.dart';
+import 'package:musiclove/feature/main_shell/presentation/view/main_shell_view.dart';
 import 'package:musiclove/feature/playlist/presentation/view/playlist_detail_view.dart';
 import 'package:musiclove/feature/playlist/presentation/view/playlist_view.dart';
 import 'package:musiclove/feature/setting/presentation/view/setting_headphone_bluetooth_view.dart';
