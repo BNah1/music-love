@@ -25,11 +25,14 @@ class MusicColumnTileWidget extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(vertical: 8),
       onTap: () {
-        if (currentPlaylistId != null) {
-          context.push('${AppRoutes.playMusic}/${song.id}?playlistId=$currentPlaylistId');
-        } else {
-          context.push('${AppRoutes.playMusic}/${song.id}');
-        }
+        final location = Uri(
+          path: '${AppRoutes.playMusic}/${song.id}',
+          queryParameters: currentPlaylistId != null && currentPlaylistId!.isNotEmpty
+              ? {'playlistId': currentPlaylistId!}
+              : null,
+        ).toString();
+
+        context.push(location);
       },
       leading: Container(
         width: 50,

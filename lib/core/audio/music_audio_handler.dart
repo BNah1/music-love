@@ -169,24 +169,43 @@ class MusicAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler 
 
     mediaItem.add(items[safeStartIndex]);
 
-    unawaited(
-      _player
-          .setAudioSources(
+    try {
+      await _player.setAudioSources(
         sources,
         initialIndex: safeStartIndex,
         initialPosition: position,
-      )
-          .then((_) {
-            play();
-      }).catchError((error) {
-        playbackState.add(
-          playbackState.value.copyWith(
-            processingState: AudioProcessingState.error,
-            errorMessage: error.toString(),
-          ),
-        );
-      }),
+      );
+
+      await play();
+    } catch (error) {
+      playbackState.add(
+        playbackState.value.copyWith(
+          processingState: AudioProcessingState.error,
+          errorMessage: error.toString(),
+        ),
+      );
+    }
+  }
+
+  Future<void> playQueueIndex({
+    required int index,
+    Duration position = Duration.zero,
+  }) async {
+    final currentQueue = queue.value;
+    if (currentQueue.isEmpty) return;
+
+    final safeIndex = index < 0 || index >= currentQueue.length
+        ? 0
+        : index;
+
+    mediaItem.add(currentQueue[safeIndex]);
+
+    await _player.seek(
+      position,
+      index: safeIndex,
     );
+
+    await play();
   }
 
   @override

@@ -109,35 +109,48 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
       final currentQueueIds = audioHandler.queue.value.map((e) => e.id).toList();
       final targetQueueIds = targetItems.map((e) => e.id).toList();
 
+      final isCurrentSong = currentItem?.id == song.id;
       final isSameQueue = listEquals(
         currentQueueIds,
         targetQueueIds,
       );
 
-      if (currentItem?.id != song.id || !isSameQueue) {
+      // Nếu chỉ mở màn hình bài đang phát thì không prepare lại player.
+      // Prepare lại queue sẽ làm just_audio setAudioSources() và vị trí phát quay về đầu bài.
+      if (!isCurrentSong) {
         if (audioHandler is MusicAudioHandler) {
-          await audioHandler.setQueueAndPlay(
-            items: targetItems,
-            startIndex: startIndex,
-          );
+          if (isSameQueue) {
+            // Đang cùng playlist/queue, chỉ nhảy sang index bài được chọn.
+             audioHandler.playQueueIndex(
+              index: startIndex,
+            );
+          } else {
+            // Queue khác thật sự thì mới tạo lại queue và phát từ bài được chọn.
+             audioHandler.setQueueAndPlay(
+              items: targetItems,
+              startIndex: startIndex,
+            );
+          }
         } else {
-          await audioHandler.playMediaItem(targetItems[startIndex]);
+           audioHandler.playMediaItem(targetItems[startIndex]);
         }
-      } else {
-        await audioHandler.play();
       }
+
+
       setState(() {
         _isLoading = false;
         _errorMessage = null;
       });
+
       if (!mounted) return;
 
-
     } catch (e) {
+
       setState(() {
         _isLoading = false;
         _errorMessage = 'Lỗi mở bài hát: $e';
       });
+
       if (!mounted) return;
     }
   }

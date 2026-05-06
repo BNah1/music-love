@@ -31,10 +31,18 @@ class MiniPlayerOverlay extends ConsumerWidget {
               child: GestureDetector(
                 onTap: () {
                   final path = item.extras?['path'] as String?;
+                  final playlistId = item.extras?['playlistId'] as String?;
 
                   if (path == null) return;
 
-                  context.push('${AppRoutes.playMusic}/${item.id}');
+                  final location = Uri(
+                    path: '${AppRoutes.playMusic}/${item.id}',
+                    queryParameters: playlistId != null && playlistId.isNotEmpty
+                        ? {'playlistId': playlistId}
+                        : null,
+                  ).toString();
+
+                  context.push(location);
                 },
                 child: Container(
                   height: 68,
