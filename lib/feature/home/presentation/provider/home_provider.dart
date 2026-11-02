@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:musiclove/core/constant/app_enum.dart';
 import 'package:musiclove/feature/home/presentation/state/home_state.dart';
@@ -5,83 +7,58 @@ import 'package:musiclove/feature/library/domain/repository/song_repository.dart
 import 'package:musiclove/feature/library/presentation/provider/library_provider.dart';
 import 'package:musiclove/shared/entity/mp3_file_entity.dart';
 
-final homeProvider = StateNotifierProvider<HomeNotifier,HomeState>((ref){
+final homeProvider = StateNotifierProvider<HomeNotifier, HomeState>((ref) {
   final songRepository = ref.read(songRepositoryProvider);
 
-  return HomeNotifier(
-    songRepository: songRepository,
-  )..loadSongs();
+  final notifier = HomeNotifier(songRepository: songRepository);
+  unawaited(notifier.loadSongs());
+  return notifier;
 });
 
-
-class HomeNotifier extends StateNotifier<HomeState>{
+class HomeNotifier extends StateNotifier<HomeState> {
   final SongRepository songRepository;
 
-  HomeNotifier({
-    required this.songRepository,
-  }) : super(const HomeState());
+  HomeNotifier({required this.songRepository}) : super(const HomeState());
 
-
-  Future<void> loadSongs() async{
-    stateLoading();
-
-    try{
+  Future<void> loadSongs() async {
+    try {
       final songs = await songRepository.getAllSongs();
       stateLoaded(songs);
-
-    }catch(e){
+      unawaited(scanSongs());
+    } catch (e) {
       stateError(e.toString());
     }
-
   }
 
   void searchSongs(String keyword) {
-    state = state.copyWith(
-      searchQuery: keyword,
-    );
+    state = state.copyWith(searchQuery: keyword);
   }
 
-
   void pressSearch() {
-    state = state.copyWith(
-      isSearch: !state.isSearch,
-    );
+    state = state.copyWith(isSearch: !state.isSearch);
   }
 
   void clearSearch() {
-    state = state.copyWith(
-      searchQuery: '',
-    );
+    state = state.copyWith(searchQuery: '');
   }
 
-  Future<void> scanSongs() async{
-    if(state.isScanning) return;
+  Future<void> scanSongs() async {
+    if (state.isScanning) return;
 
     stateScanning();
 
-    try{
+    try {
       final songs = await songRepository.scanLocalSongs();
 
       stateLoaded(songs);
-
-    }catch(e){
+    } catch (e) {
       stateError(e.toString());
     }
   }
 
-
-
-
-
-
-
-
-
-
-
   ///////////////////////////////
 
-  void stateLoaded(List<Mp3FileEntity> songs){
+  void stateLoaded(List<Mp3FileEntity> songs) {
     state = state.copyWith(
       songs: songs,
       status: songs.isEmpty ? BaseStatus.empty : BaseStatus.loaded,
@@ -90,14 +67,14 @@ class HomeNotifier extends StateNotifier<HomeState>{
     );
   }
 
-  void stateLoading(){
+  void stateLoading() {
     state = state.copyWith(
-      status: BaseStatus.loading,
+      status: state.songs.isEmpty ? BaseStatus.loading : state.status,
       errorMessage: '',
     );
   }
 
-  void stateError(String error){
+  void stateError(String error) {
     state = state.copyWith(
       status: BaseStatus.error,
       errorMessage: error,
@@ -105,7 +82,7 @@ class HomeNotifier extends StateNotifier<HomeState>{
     );
   }
 
-  void stateScanning(){
+  void stateScanning() {
     state = state.copyWith(
       status: BaseStatus.loading,
       isScanning: true,

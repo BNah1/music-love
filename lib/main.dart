@@ -8,9 +8,7 @@ import 'app.dart';
 import 'core/audio/music_audio_handler.dart';
 import 'core/provider/audio_handler_provider.dart';
 
-
 Future<void> main() async {
-
   WidgetsFlutterBinding.ensureInitialized();
 
   // Khởi tạo local database.
@@ -28,18 +26,14 @@ Future<void> main() async {
       androidNotificationChannelId: 'com.musiclove.audio',
       androidNotificationChannelName: 'Music playback',
       androidNotificationOngoing: false,
-      androidStopForegroundOnPause: false,
+      androidStopForegroundOnPause: true,
     ),
   );
 
   runApp(
     ProviderScope(
-      overrides: [
-        audioHandlerProvider.overrideWithValue(audioHandler),
-      ],
+      overrides: [audioHandlerProvider.overrideWithValue(audioHandler)],
       child: const MyApp(),
     ),
   );
 }
-
-

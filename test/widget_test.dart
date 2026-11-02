@@ -1,30 +1,37 @@
-// This is a basic Flutter view test.
-//
-// To perform an interaction with a view in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the view
-// tree, read text, and verify that the values of view properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:musiclove/app.dart';
-
+import 'package:musiclove/core/constant/app_enum.dart';
+import 'package:musiclove/feature/home/presentation/state/home_state.dart';
+import 'package:musiclove/shared/entity/mp3_file_entity.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  test('HomeState filters songs by title, artist, and album', () {
+    const state = HomeState(
+      status: BaseStatus.loaded,
+      songs: [
+        Mp3FileEntity(
+          id: '1',
+          path: '/music/one.mp3',
+          title: 'One Love',
+          artist: 'Artist A',
+          album: 'First Album',
+          duration: 1000,
+          size: 1,
+          dateAdded: 1,
+        ),
+        Mp3FileEntity(
+          id: '2',
+          path: '/music/two.mp3',
+          title: 'Two',
+          artist: 'Artist B',
+          album: 'Second Album',
+          duration: 1000,
+          size: 1,
+          dateAdded: 1,
+        ),
+      ],
+      searchQuery: 'first album',
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(state.filteredSongs.map((song) => song.id), ['1']);
   });
 }

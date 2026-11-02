@@ -8,18 +8,13 @@ import 'package:musiclove/shared/widget/music_column_tile_widget.dart';
 class PlaylistDetailView extends ConsumerStatefulWidget {
   final String playlistId;
 
-  const PlaylistDetailView({
-    super.key,
-    required this.playlistId,
-  });
+  const PlaylistDetailView({super.key, required this.playlistId});
 
   @override
   ConsumerState<PlaylistDetailView> createState() => _PlaylistDetailViewState();
 }
 
 class _PlaylistDetailViewState extends ConsumerState<PlaylistDetailView> {
-
-
   @override
   void initState() {
     super.initState();
@@ -39,9 +34,7 @@ class _PlaylistDetailViewState extends ConsumerState<PlaylistDetailView> {
 
     if (detail == null) {
       return Container(
-        decoration: BoxDecoration(
-          gradient: appTheme.backgroundGradient,
-        ),
+        decoration: BoxDecoration(gradient: appTheme.backgroundGradient),
         child: Scaffold(
           backgroundColor: Colors.transparent,
           body: Center(
@@ -55,9 +48,7 @@ class _PlaylistDetailViewState extends ConsumerState<PlaylistDetailView> {
     }
 
     return Container(
-      decoration: BoxDecoration(
-        gradient: appTheme.backgroundGradient,
-      ),
+      decoration: BoxDecoration(gradient: appTheme.backgroundGradient),
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
@@ -83,21 +74,27 @@ class _PlaylistDetailViewState extends ConsumerState<PlaylistDetailView> {
                 ),
               )
             : Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: ListView(
                   padding: const EdgeInsets.only(bottom: 110),
-                  itemCount: detail.songs.length,
-                  itemBuilder: (_, index) {
-                    final song = detail.songs[index];
-
-                    return MusicColumnTileWidget(
-                      song: song,
-                      currentPlaylistId: detail.playlist.id,
-                      onChanged: _load,
-                    );
-                  },
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, bottom: 8),
+                      child: Text(
+                        '${detail.songs.length} bài hát',
+                        style: TextStyle(color: appTheme.subtitleColor),
+                      ),
+                    ),
+                    ...detail.songs.map(
+                      (song) => MusicColumnTileWidget(
+                        song: song,
+                        currentPlaylistId: detail.playlist.id,
+                        onChanged: _load,
+                      ),
+                    ),
+                  ],
                 ),
-            ),
+              ),
       ),
     );
   }

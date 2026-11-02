@@ -4,13 +4,15 @@ import 'package:audio_service/audio_service.dart';
 import 'package:hive/hive.dart';
 import 'package:just_audio/just_audio.dart';
 
-class MusicAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
+class MusicAudioHandler extends BaseAudioHandler
+    with QueueHandler, SeekHandler {
   final AudioPlayer _player = AudioPlayer();
 
   AudioServiceShuffleMode _shuffleMode = AudioServiceShuffleMode.none;
   AudioServiceRepeatMode _repeatMode = AudioServiceRepeatMode.none;
 
   Timer? _cacheTimer;
+  Future<void> _modeChangeQueue = Future<void>.value();
 
   MusicAudioHandler() {
     _listenPlaybackState();
@@ -25,8 +27,8 @@ class MusicAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler 
           controls: [
             MediaControl.skipToPrevious,
             _player.playing ? MediaControl.pause : MediaControl.play,
-            MediaControl.skipToNext,
             MediaControl.stop,
+            MediaControl.skipToNext,
           ],
           systemActions: const {
             MediaAction.seek,
@@ -63,12 +65,9 @@ class MusicAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler 
   void _listenPositionCache() {
     _cacheTimer?.cancel();
 
-    _cacheTimer = Timer.periodic(
-      const Duration(seconds: 3),
-          (_) {
-        _saveLastSession();
-      },
-    );
+    _cacheTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      _saveLastSession();
+    });
   }
 
   AudioProcessingState _mapProcessingState(ProcessingState state) {
@@ -112,10 +111,7 @@ class MusicAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler 
     final sources = currentQueue.map((item) {
       final path = item.extras?['path'] as String;
 
-      return AudioSource.uri(
-        Uri.file(path),
-        tag: item,
-      );
+      return AudioSource.uri(Uri.file(path), tag: item);
     }).toList();
 
     int nextIndex = currentIndex;
@@ -128,7 +124,9 @@ class MusicAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler 
       nextIndex = currentQueue.length - 1;
     }
 
-    final currentPosition = isRemovingCurrentSong ? Duration.zero : _player.position;
+    final currentPosition = isRemovingCurrentSong
+        ? Duration.zero
+        : _player.position;
 
     await _player.setAudioSources(
       sources,
@@ -161,10 +159,7 @@ class MusicAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler 
     final sources = items.map((item) {
       final path = item.extras?['path'] as String;
 
-      return AudioSource.uri(
-        Uri.file(path),
-        tag: item,
-      );
+      return AudioSource.uri(Uri.file(path), tag: item);
     }).toList();
 
     mediaItem.add(items[safeStartIndex]);
@@ -194,16 +189,11 @@ class MusicAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler 
     final currentQueue = queue.value;
     if (currentQueue.isEmpty) return;
 
-    final safeIndex = index < 0 || index >= currentQueue.length
-        ? 0
-        : index;
+    final safeIndex = index < 0 || index >= currentQueue.length ? 0 : index;
 
     mediaItem.add(currentQueue[safeIndex]);
 
-    await _player.seek(
-      position,
-      index: safeIndex,
-    );
+    await _player.seek(position, index: safeIndex);
 
     await play();
   }
@@ -225,6 +215,8 @@ class MusicAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler 
     await _saveLastSession();
 
     await _player.stop();
+
+    mediaItem.add(null);
 
     playbackState.add(
       playbackState.value.copyWith(
@@ -281,51 +273,100 @@ class MusicAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler 
 
   @override
   Future<void> setShuffleMode(AudioServiceShuffleMode shuffleMode) async {
-    _shuffleMode = shuffleMode;
+    await _serializeModeChange(() async {
+      final position = _player.position;
+      final wasPlaying = _player.playing;
+      final currentId = mediaItem.valueOrNull?.id;
+      _shuffleMode = shuffleMode;
 
-    final enabled = shuffleMode != AudioServiceShuffleMode.none;
+      await _player.setShuffleModeEnabled(
+        shuffleMode != AudioServiceShuffleMode.none,
+      );
 
-    await _player.setShuffleModeEnabled(enabled);
+      if (shuffleMode != AudioServiceShuffleMode.none) {
+        await _player.shuffle();
+      }
 
-    if (enabled) {
-      await _player.shuffle();
-    }
+      await _restoreCurrentPlayback(
+        mediaId: currentId,
+        position: position,
+        wasPlaying: wasPlaying,
+      );
 
-    playbackState.add(
-      playbackState.value.copyWith(
-        shuffleMode: _shuffleMode,
-      ),
-    );
-
-    await _saveLastSession();
+      playbackState.add(
+        playbackState.value.copyWith(shuffleMode: _shuffleMode),
+      );
+      await _saveLastSession();
+    });
   }
 
   @override
   Future<void> setRepeatMode(AudioServiceRepeatMode repeatMode) async {
-    _repeatMode = repeatMode;
+    await _serializeModeChange(() async {
+      final position = _player.position;
+      final wasPlaying = _player.playing;
+      final currentId = mediaItem.valueOrNull?.id;
+      _repeatMode = repeatMode;
 
-    switch (repeatMode) {
-      case AudioServiceRepeatMode.none:
-        await _player.setLoopMode(LoopMode.off);
-        break;
+      switch (repeatMode) {
+        case AudioServiceRepeatMode.none:
+          await _player.setLoopMode(LoopMode.off);
+          break;
 
-      case AudioServiceRepeatMode.one:
-        await _player.setLoopMode(LoopMode.one);
-        break;
+        case AudioServiceRepeatMode.one:
+          await _player.setLoopMode(LoopMode.one);
+          break;
 
-      case AudioServiceRepeatMode.all:
-      case AudioServiceRepeatMode.group:
-        await _player.setLoopMode(LoopMode.all);
-        break;
+        case AudioServiceRepeatMode.all:
+        case AudioServiceRepeatMode.group:
+          await _player.setLoopMode(LoopMode.all);
+          break;
+      }
+
+      await _restoreCurrentPlayback(
+        mediaId: currentId,
+        position: position,
+        wasPlaying: wasPlaying,
+      );
+
+      playbackState.add(playbackState.value.copyWith(repeatMode: _repeatMode));
+      await _saveLastSession();
+    });
+  }
+
+  Future<void> _serializeModeChange(Future<void> Function() action) {
+    final previous = _modeChangeQueue;
+    final completer = Completer<void>();
+    _modeChangeQueue = completer.future;
+
+    return () async {
+      await previous;
+      try {
+        await action();
+      } finally {
+        completer.complete();
+      }
+    }();
+  }
+
+  Future<void> _restoreCurrentPlayback({
+    required String? mediaId,
+    required Duration position,
+    required bool wasPlaying,
+  }) async {
+    if (mediaId == null || _player.sequence.isEmpty) return;
+
+    final index = _player.sequence.indexWhere((source) {
+      return (source.tag as MediaItem?)?.id == mediaId;
+    });
+
+    if (index < 0) return;
+
+    await _player.seek(position, index: index);
+
+    if (wasPlaying && !_player.playing) {
+      await _player.play();
     }
-
-    playbackState.add(
-      playbackState.value.copyWith(
-        repeatMode: _repeatMode,
-      ),
-    );
-
-    await _saveLastSession();
   }
 
   Future<void> _saveLastSession() async {
@@ -334,19 +375,16 @@ class MusicAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler 
 
     final box = Hive.box('player_cache');
 
-    await box.put(
-      'last_session',
-      {
-        'songId': current.id,
-        'queueIds': queue.value.map((e) => e.id).toList(),
-        'currentIndex': _player.currentIndex ?? 0,
-        'positionMs': _player.position.inMilliseconds,
-        'isPlaying': _player.playing,
-        'shuffleMode': _shuffleMode.name,
-        'repeatMode': _repeatMode.name,
-        'updatedAt': DateTime.now().millisecondsSinceEpoch,
-      },
-    );
+    await box.put('last_session', {
+      'songId': current.id,
+      'queueIds': queue.value.map((e) => e.id).toList(),
+      'currentIndex': _player.currentIndex ?? 0,
+      'positionMs': _player.position.inMilliseconds,
+      'isPlaying': _player.playing,
+      'shuffleMode': _shuffleMode.name,
+      'repeatMode': _repeatMode.name,
+      'updatedAt': DateTime.now().millisecondsSinceEpoch,
+    });
   }
 
   Future<Map?> getLastSession() async {
