@@ -18,7 +18,9 @@ class MainShellView extends StatelessWidget {
           const Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
-              padding: EdgeInsets.only(bottom: 75),
+              // BottomNavWidget cao 65px, cộng padding ngoài và safe-area.
+              // Chừa thêm khoảng để mini player không bị tab bar che.
+              padding: EdgeInsets.only(bottom: 150),
               child: MiniPlayerOverlay(),
             ),
           ),
