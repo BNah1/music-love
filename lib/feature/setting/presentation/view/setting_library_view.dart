@@ -1,4 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:musiclove/core/constant/app_string.dart';
 import 'package:musiclove/feature/setting/domain/repository/setting_repository.dart';
 import 'package:musiclove/feature/setting/presentation/view/widget/action_tile_widget.dart';
 import 'package:musiclove/feature/setting/presentation/view/widget/bottom_option_tile.dart';
@@ -64,34 +66,29 @@ class _SettingLibraryViewState extends State<SettingLibraryView> {
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đã khôi phục cài đặt thư viện'),
-      ),
+      SnackBar(content: Text(context.tr(AppString.settingsLibraryRestored))),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text('Thư viện'),),
-        body: _buildLibrarySection());
+      appBar: AppBar(title: Text(context.tr(AppString.settingsLibrary))),
+      body: _buildLibrarySection(context),
+    );
   }
 
-
-  Widget _buildLibrarySection() {
+  Widget _buildLibrarySection(BuildContext context) {
     return SettingCard(
-      title: 'Thư viện',
+      title: context.tr(AppString.settingsLibrary),
       icon: Icons.library_music_outlined,
       children: [
         SwitchTile(
-          title: 'Tự quét nhạc khi mở app',
-          subtitle: 'Tự cập nhật danh sách MP3 trong máy',
+          title: context.tr(AppString.settingsLibraryAutoScan),
+          subtitle: context.tr(AppString.settingsLibraryAutoScanDesc),
           value: _autoScanLibrary,
           onChanged: (value) async {
-            await _repo.setBool(
-              SettingKeys.autoScanLibrary,
-              value,
-            );
+            await _repo.setBool(SettingKeys.autoScanLibrary, value);
 
             setState(() {
               _autoScanLibrary = value;
@@ -99,14 +96,11 @@ class _SettingLibraryViewState extends State<SettingLibraryView> {
           },
         ),
         SwitchTile(
-          title: 'Quét file ẩn',
-          subtitle: 'Bao gồm các thư mục hoặc file bắt đầu bằng dấu chấm',
+          title: context.tr(AppString.settingsLibraryScanHidden),
+          subtitle: context.tr(AppString.settingsLibraryScanHiddenDesc),
           value: _scanHiddenFiles,
           onChanged: (value) async {
-            await _repo.setBool(
-              SettingKeys.scanHiddenFiles,
-              value,
-            );
+            await _repo.setBool(SettingKeys.scanHiddenFiles, value);
 
             setState(() {
               _scanHiddenFiles = value;
@@ -114,13 +108,13 @@ class _SettingLibraryViewState extends State<SettingLibraryView> {
           },
         ),
         SelectTile(
-          title: 'Sắp xếp thư viện',
-          subtitle: _librarySortLabel(_librarySortType),
-          onTap: _showLibrarySortSheet,
+          title: context.tr(AppString.settingsLibrarySort),
+          subtitle: _librarySortLabel(context, _librarySortType),
+          onTap: () => _showLibrarySortSheet(context),
         ),
         ActionTile(
-          title: 'Khôi phục cài đặt thư viện',
-          subtitle: 'Đưa các tùy chọn thư viện về mặc định',
+          title: context.tr(AppString.settingsLibraryRestore),
+          subtitle: context.tr(AppString.settingsLibraryRestoreDesc),
           icon: Icons.restore_rounded,
           onTap: _clearLibrarySettings,
         ),
@@ -128,59 +122,59 @@ class _SettingLibraryViewState extends State<SettingLibraryView> {
     );
   }
 
-  String _librarySortLabel(String value) {
+  String _librarySortLabel(BuildContext context, String value) {
     switch (value) {
       case 'artist':
-        return 'Ca sĩ';
+        return context.tr(AppString.settingsSortArtist);
       case 'date':
-        return 'Mới thêm';
+        return context.tr(AppString.settingsSortDate);
       case 'duration':
-        return 'Thời lượng';
+        return context.tr(AppString.settingsSortDuration);
       case 'name':
       default:
-        return 'Tên bài hát';
+        return context.tr(AppString.settingsSortName);
     }
   }
 
-  Future<void> _showLibrarySortSheet() async {
+  Future<void> _showLibrarySortSheet(BuildContext context) async {
     await showModalBottomSheet(
       context: context,
       useRootNavigator: true,
       showDragHandle: true,
-      builder: (_) {
+      builder: (bottomSheetContext) {
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               BottomOptionTile(
-                title: 'Tên bài hát',
+                title: bottomSheetContext.tr(AppString.settingsSortName),
                 selected: _librarySortType == 'name',
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(bottomSheetContext);
                   _setLibrarySortType('name');
                 },
               ),
               BottomOptionTile(
-                title: 'Ca sĩ',
+                title: bottomSheetContext.tr(AppString.settingsSortArtist),
                 selected: _librarySortType == 'artist',
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(bottomSheetContext);
                   _setLibrarySortType('artist');
                 },
               ),
               BottomOptionTile(
-                title: 'Mới thêm',
+                title: bottomSheetContext.tr(AppString.settingsSortDate),
                 selected: _librarySortType == 'date',
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(bottomSheetContext);
                   _setLibrarySortType('date');
                 },
               ),
               BottomOptionTile(
-                title: 'Thời lượng',
+                title: bottomSheetContext.tr(AppString.settingsSortDuration),
                 selected: _librarySortType == 'duration',
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(bottomSheetContext);
                   _setLibrarySortType('duration');
                 },
               ),

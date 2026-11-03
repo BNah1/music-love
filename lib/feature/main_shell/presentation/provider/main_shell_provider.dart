@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:musiclove/core/constant/app_string.dart';
 import 'package:musiclove/core/constant/routes.dart';
 import 'package:musiclove/feature/main_shell/presentation/state/menu_item.dart';
 
@@ -17,19 +18,19 @@ class MainShellProvider extends Notifier<int> {
       index: 0,
       path: AppRoutes.home,
       icon: Icons.dashboard_rounded,
-      label: 'Home',
+      label: AppString.tabHome,
     ),
     MenuItem(
       index: 1,
       path: AppRoutes.playList,
       icon: Icons.library_music_rounded,
-      label: 'Library',
+      label: AppString.tabLibrary,
     ),
     MenuItem(
       index: 2,
       path: AppRoutes.setting,
       icon: Icons.settings_rounded,
-      label: 'Settings',
+      label: AppString.tabSettings,
     ),
   ];
 
@@ -48,6 +49,9 @@ class MainShellProvider extends Notifier<int> {
   }
 
   /// route cho bottom menu
-  final List<String> appRoutes = [AppRoutes.home, AppRoutes.playList, AppRoutes.setting];
-
+  final List<String> appRoutes = [
+    AppRoutes.home,
+    AppRoutes.playList,
+    AppRoutes.setting,
+  ];
 }

@@ -1,5 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:musiclove/core/constant/app_string.dart';
 import 'package:musiclove/core/constant/theme.dart';
 import 'package:musiclove/feature/playlist/presentation/provider/playlist_provider.dart';
 import 'package:musiclove/shared/entity/mp3_file_entity.dart';
@@ -56,18 +58,19 @@ class MoreVertWidget extends ConsumerWidget {
         side: BorderSide(color: appTheme.shadowColor.withOpacity(0.05)),
       ),
       onSelected: (action) => _handleMusicAction(context, ref, action),
-      itemBuilder: (context) => _buildMenuItems(appTheme),
+      itemBuilder: (context) => _buildMenuItems(context, appTheme),
     );
   }
 
   List<PopupMenuEntry<_MusicAction>> _buildMenuItems(
+    BuildContext context,
     AppThemeExtension appTheme,
   ) {
     return [
       _buildPopupItem(
         value: _MusicAction.addToPlaylist,
         icon: Icons.playlist_add_rounded,
-        label: 'Thêm vào playlist',
+        label: context.tr(AppString.menuAddToPlaylist),
         appTheme: appTheme,
       ),
       if (currentPlaylistId != null) ...[
@@ -75,32 +78,32 @@ class MoreVertWidget extends ConsumerWidget {
         _buildPopupItem(
           value: _MusicAction.moveToTop,
           icon: Icons.vertical_align_top_rounded,
-          label: 'Đưa lên đầu',
+          label: context.tr(AppString.menuMoveToTop),
           appTheme: appTheme,
         ),
         _buildPopupItem(
           value: _MusicAction.moveUp,
           icon: Icons.keyboard_arrow_up_rounded,
-          label: 'Đưa lên 1 vị trí',
+          label: context.tr(AppString.menuMoveUp),
           appTheme: appTheme,
         ),
         _buildPopupItem(
           value: _MusicAction.moveDown,
           icon: Icons.keyboard_arrow_down_rounded,
-          label: 'Đưa xuống 1 vị trí',
+          label: context.tr(AppString.menuMoveDown),
           appTheme: appTheme,
         ),
         _buildPopupItem(
           value: _MusicAction.moveToBottom,
           icon: Icons.vertical_align_bottom_rounded,
-          label: 'Đưa xuống cuối',
+          label: context.tr(AppString.menuMoveToBottom),
           appTheme: appTheme,
         ),
         const PopupMenuDivider(height: 1),
         _buildPopupItem(
           value: _MusicAction.removeFromPlaylist,
           icon: Icons.delete_outline_rounded,
-          label: 'Xóa khỏi playlist',
+          label: context.tr(AppString.menuRemoveFromPlaylist),
           appTheme: appTheme,
           isDanger: true,
         ),
@@ -179,7 +182,7 @@ class MoreVertWidget extends ConsumerWidget {
     if (!context.mounted) return;
 
     if (playlists.isEmpty) {
-      _showSnackBar(context, 'Chưa có playlist nào');
+      _showSnackBar(context, context.tr(AppString.playlistNoPlaylistsYet));
       return;
     }
 
@@ -205,7 +208,7 @@ class MoreVertWidget extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        'Thêm vào playlist',
+                        bottomSheetContext.tr(AppString.playlistAddTo),
                         style: TextStyle(
                           color: appTheme.selectedIconColor,
                           fontSize: 20,
@@ -214,7 +217,7 @@ class MoreVertWidget extends ConsumerWidget {
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Đóng',
+                      tooltip: bottomSheetContext.tr(AppString.commonClose),
                       onPressed: () => Navigator.pop(bottomSheetContext),
                       icon: Icon(
                         Icons.close_rounded,
@@ -224,7 +227,10 @@ class MoreVertWidget extends ConsumerWidget {
                   ],
                 ),
                 Text(
-                  'Chọn nơi lưu “${song.title}”',
+                  bottomSheetContext.tr(
+                    AppString.playlistChooseSave,
+                    namedArgs: {'title': song.title},
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -257,7 +263,10 @@ class MoreVertWidget extends ConsumerWidget {
                                     Navigator.pop(bottomSheetContext);
                                     _showSnackBar(
                                       context,
-                                      'Đã thêm vào ${playlist.name}',
+                                      context.tr(
+                                        AppString.playlistAdded,
+                                        namedArgs: {'name': playlist.name},
+                                      ),
                                     );
                                   }
                                   onChanged?.call();
@@ -293,7 +302,13 @@ class MoreVertWidget extends ConsumerWidget {
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        '${playlist.songIds.length} bài hát',
+                                        bottomSheetContext.tr(
+                                          AppString.playlistSongsCount,
+                                          namedArgs: {
+                                            'count':
+                                                '${playlist.songIds.length}',
+                                          },
+                                        ),
                                         style: TextStyle(
                                           color: appTheme.subtitleColor,
                                           fontSize: 12,
@@ -376,7 +391,7 @@ class MoreVertWidget extends ConsumerWidget {
     await onRemoveFromAudioHandler?.call(song.id);
 
     if (context.mounted) {
-      _showSnackBar(context, 'Đã xóa khỏi playlist');
+      _showSnackBar(context, context.tr(AppString.playlistRemoved));
     }
     onChanged?.call();
   }

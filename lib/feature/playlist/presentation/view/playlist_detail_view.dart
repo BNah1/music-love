@@ -1,5 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:musiclove/core/constant/app_string.dart';
 import 'package:musiclove/core/constant/theme.dart';
 import 'package:musiclove/feature/playlist/presentation/provider/playlist_provider.dart';
 import 'package:musiclove/feature/playlist/presentation/view/widget/edit_playlist_widget.dart';
@@ -39,7 +41,7 @@ class _PlaylistDetailViewState extends ConsumerState<PlaylistDetailView> {
           backgroundColor: Colors.transparent,
           body: Center(
             child: Text(
-              'Không tìm thấy playlist',
+              context.tr(AppString.playlistNotFound),
               style: TextStyle(color: appTheme.subtitleColor),
             ),
           ),
@@ -69,7 +71,7 @@ class _PlaylistDetailViewState extends ConsumerState<PlaylistDetailView> {
         body: detail.songs.isEmpty
             ? Center(
                 child: Text(
-                  'Chưa có bài hát',
+                  context.tr(AppString.playlistNoSongs),
                   style: TextStyle(color: appTheme.subtitleColor),
                 ),
               )
@@ -81,7 +83,10 @@ class _PlaylistDetailViewState extends ConsumerState<PlaylistDetailView> {
                     Padding(
                       padding: const EdgeInsets.only(top: 8, bottom: 8),
                       child: Text(
-                        '${detail.songs.length} bài hát',
+                        context.tr(
+                          AppString.playlistSongsCount,
+                          namedArgs: {'count': '${detail.songs.length}'},
+                        ),
                         style: TextStyle(color: appTheme.subtitleColor),
                       ),
                     ),

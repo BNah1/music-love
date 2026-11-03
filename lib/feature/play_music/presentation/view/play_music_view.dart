@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:musiclove/core/constant/app_enum.dart';
+import 'package:musiclove/core/constant/app_string.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:musiclove/core/constant/theme.dart';
 import 'package:musiclove/feature/library/data/model/mp3_file_model.dart';
 import 'package:musiclove/core/provider/audio_handler_provider.dart';
@@ -24,15 +26,11 @@ class PlayMusicView extends ConsumerStatefulWidget {
   /// Giữ lại để không vỡ route cũ đang truyền extra Mp3FileModel.
   final Mp3FileModel? song;
 
-  const PlayMusicView({
-    super.key,
-    this.songId,
-    this.playlistId,
-    this.song,
-  }) : assert(
-  songId != null || song != null,
-  'PlayMusicView cần songId hoặc song',
-  );
+  const PlayMusicView({super.key, this.songId, this.playlistId, this.song})
+    : assert(
+        songId != null || song != null,
+        'PlayMusicView cần songId hoặc song',
+      );
 
   @override
   ConsumerState<PlayMusicView> createState() => _PlayMusicViewState();
@@ -106,14 +104,13 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
       final startIndex = _findStartIndex(queueSongs, song.id);
       final targetItems = queueSongs.map(_songToMediaItem).toList();
 
-      final currentQueueIds = audioHandler.queue.value.map((e) => e.id).toList();
+      final currentQueueIds = audioHandler.queue.value
+          .map((e) => e.id)
+          .toList();
       final targetQueueIds = targetItems.map((e) => e.id).toList();
 
       final isCurrentSong = currentItem?.id == song.id;
-      final isSameQueue = listEquals(
-        currentQueueIds,
-        targetQueueIds,
-      );
+      final isSameQueue = listEquals(currentQueueIds, targetQueueIds);
 
       // Nếu chỉ mở màn hình bài đang phát thì không prepare lại player.
       // Prepare lại queue sẽ làm just_audio setAudioSources() và vị trí phát quay về đầu bài.
@@ -121,21 +118,18 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
         if (audioHandler is MusicAudioHandler) {
           if (isSameQueue) {
             // Đang cùng playlist/queue, chỉ nhảy sang index bài được chọn.
-             audioHandler.playQueueIndex(
-              index: startIndex,
-            );
+            audioHandler.playQueueIndex(index: startIndex);
           } else {
             // Queue khác thật sự thì mới tạo lại queue và phát từ bài được chọn.
-             audioHandler.setQueueAndPlay(
+            audioHandler.setQueueAndPlay(
               items: targetItems,
               startIndex: startIndex,
             );
           }
         } else {
-           audioHandler.playMediaItem(targetItems[startIndex]);
+          audioHandler.playMediaItem(targetItems[startIndex]);
         }
       }
-
 
       setState(() {
         _isLoading = false;
@@ -143,21 +137,19 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
       });
 
       if (!mounted) return;
-
     } catch (e) {
-
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Lỗi mở bài hát: $e';
+        _errorMessage = AppString.errorOpenSong.tr(
+          namedArgs: {'error': e.toString()},
+        );
       });
 
       if (!mounted) return;
     }
   }
 
-  List<Mp3FileModel> _getQueueSongs({
-    required Mp3FileModel startSong,
-  }) {
+  List<Mp3FileModel> _getQueueSongs({required Mp3FileModel startSong}) {
     final playlistId = widget.playlistId;
 
     if (playlistId == null || playlistId.isEmpty) {
@@ -170,9 +162,7 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
       return [startSong];
     }
 
-    final hasStartSong = playlistSongs.any(
-          (song) => song.id == startSong.id,
-    );
+    final hasStartSong = playlistSongs.any((song) => song.id == startSong.id);
 
     if (!hasStartSong) {
       return [startSong, ...playlistSongs];
@@ -181,13 +171,8 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
     return playlistSongs;
   }
 
-  int _findStartIndex(
-      List<Mp3FileModel> songs,
-      String songId,
-      ) {
-    final index = songs.indexWhere(
-          (song) => song.id == songId,
-    );
+  int _findStartIndex(List<Mp3FileModel> songs, String songId) {
+    final index = songs.indexWhere((song) => song.id == songId);
 
     return index < 0 ? 0 : index;
   }
@@ -206,15 +191,13 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
 
       return songIds
           .map((id) {
-        final data = songBox.get(id);
+            final data = songBox.get(id);
 
-        if (data == null) return null;
-        if (data is! Map) return null;
+            if (data == null) return null;
+            if (data is! Map) return null;
 
-        return Mp3FileModel.fromMap(
-          Map<String, dynamic>.from(data),
-        );
-      })
+            return Mp3FileModel.fromMap(Map<String, dynamic>.from(data));
+          })
           .whereType<Mp3FileModel>()
           .where((song) => File(song.path).existsSync())
           .toList();
@@ -237,9 +220,7 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
       }
 
       if (data is Map) {
-        return Mp3FileModel.fromMap(
-          Map<String, dynamic>.from(data),
-        );
+        return Mp3FileModel.fromMap(Map<String, dynamic>.from(data));
       }
 
       return null;
@@ -358,50 +339,52 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
         decoration: _buildBackgroundDecoration(),
         child: _isLoading
             ? Center(
-          child: CircularProgressIndicator(color: appTheme.selectedIconColor),
-        )
+                child: CircularProgressIndicator(
+                  color: appTheme.selectedIconColor,
+                ),
+              )
             : _errorMessage != null
             ? _buildErrorView()
             : StreamBuilder<MediaItem?>(
-          stream: audioHandler.mediaItem,
-          builder: (context, mediaSnapshot) {
-            final mediaItem = mediaSnapshot.data;
-            final displaySong = _song;
+                stream: audioHandler.mediaItem,
+                builder: (context, mediaSnapshot) {
+                  final mediaItem = mediaSnapshot.data;
+                  final displaySong = _song;
 
-            return StreamBuilder<PlaybackState>(
-              stream: audioHandler.playbackState,
-              builder: (context, stateSnapshot) {
-                final playbackState = stateSnapshot.data;
-                final isPlaying = playbackState?.playing == true;
+                  return StreamBuilder<PlaybackState>(
+                    stream: audioHandler.playbackState,
+                    builder: (context, stateSnapshot) {
+                      final playbackState = stateSnapshot.data;
+                      final isPlaying = playbackState?.playing == true;
 
-                _syncRotationAnimation(isPlaying);
+                      _syncRotationAnimation(isPlaying);
 
-                return Column(
-                  children: [
-                    const Spacer(),
-                    _buildAlbumArt(isPlaying),
-                    const SizedBox(height: 40),
-                    _buildSongInfo(
-                      mediaItem: mediaItem,
-                      song: displaySong,
-                    ),
-                    const SizedBox(height: 30),
-                    _buildProgressBar(
-                      duration: mediaItem?.duration ??
-                          Duration(
-                            milliseconds:
-                            displaySong?.duration ?? 0,
+                      return Column(
+                        children: [
+                          const Spacer(),
+                          _buildAlbumArt(isPlaying),
+                          const SizedBox(height: 40),
+                          _buildSongInfo(
+                            mediaItem: mediaItem,
+                            song: displaySong,
                           ),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildControlPanel(playbackState),
-                    const Spacer(flex: 2),
-                  ],
-                );
-              },
-            );
-          },
-        ),
+                          const SizedBox(height: 30),
+                          _buildProgressBar(
+                            duration:
+                                mediaItem?.duration ??
+                                Duration(
+                                  milliseconds: displaySong?.duration ?? 0,
+                                ),
+                          ),
+                          const SizedBox(height: 20),
+                          _buildControlPanel(playbackState),
+                          const Spacer(flex: 2),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
       ),
     );
   }
@@ -420,7 +403,7 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
       ),
       centerTitle: true,
       title: Text(
-        'ĐANG PHÁT',
+        context.tr(AppString.playerNowPlaying),
         style: TextStyle(
           color: AppTheme.extensionOf(context).selectedIconColor,
           fontSize: 13,
@@ -448,13 +431,10 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
     );
   }
 
-
   BoxDecoration _buildBackgroundDecoration() {
     final appTheme = AppTheme.extensionOf(context);
 
-    return BoxDecoration(
-      gradient: appTheme.navIndicatorGradient,
-    );
+    return BoxDecoration(gradient: appTheme.navIndicatorGradient);
   }
 
   Widget _buildErrorView() {
@@ -471,7 +451,7 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
             ),
             const SizedBox(height: 16),
             Text(
-              _errorMessage ?? 'Có lỗi xảy ra',
+              _errorMessage ?? context.tr(AppString.homeError),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppTheme.extensionOf(context).selectedIconColor,
@@ -482,7 +462,7 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Quay lại'),
+              child: Text(context.tr(AppString.playerBack)),
             ),
           ],
         ),
@@ -557,9 +537,9 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 16,
-              color: AppTheme.extensionOf(context)
-                  .selectedIconColor
-                  .withOpacity(0.72),
+              color: AppTheme.extensionOf(
+                context,
+              ).selectedIconColor.withOpacity(0.72),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -568,9 +548,7 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
     );
   }
 
-  Widget _buildProgressBar({
-    required Duration duration,
-  }) {
+  Widget _buildProgressBar({required Duration duration}) {
     return StreamBuilder<Duration>(
       stream: AudioService.position,
       builder: (context, positionSnapshot) {
@@ -588,9 +566,10 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
 
         final maxValue = safeDuration.inMilliseconds.toDouble();
 
-        final sliderValue = displayPosition.inMilliseconds
-            .toDouble()
-            .clamp(0.0, maxValue);
+        final sliderValue = displayPosition.inMilliseconds.toDouble().clamp(
+          0.0,
+          maxValue,
+        );
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30),
@@ -599,10 +578,12 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
               SliderTheme(
                 data: SliderTheme.of(context).copyWith(
                   trackHeight: 4,
-                  activeTrackColor: AppTheme.extensionOf(context).selectedIconColor,
-                  inactiveTrackColor: AppTheme.extensionOf(context)
-                      .selectedIconColor
-                      .withOpacity(0.3),
+                  activeTrackColor: AppTheme.extensionOf(
+                    context,
+                  ).selectedIconColor,
+                  inactiveTrackColor: AppTheme.extensionOf(
+                    context,
+                  ).selectedIconColor.withOpacity(0.3),
                   thumbColor: AppTheme.extensionOf(context).selectedIconColor,
                   thumbShape: const RoundSliderThumbShape(
                     enabledThumbRadius: 6,
@@ -628,9 +609,7 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
                       _dragValue = value;
                     });
 
-                    _seekTo(
-                      Duration(milliseconds: value.toInt()),
-                    );
+                    _seekTo(Duration(milliseconds: value.toInt()));
                   },
                 ),
               ),
@@ -642,18 +621,18 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
                     Text(
                       _formatDuration(displayPosition),
                       style: TextStyle(
-                        color: AppTheme.extensionOf(context)
-                  .selectedIconColor
-                  .withOpacity(0.72),
+                        color: AppTheme.extensionOf(
+                          context,
+                        ).selectedIconColor.withOpacity(0.72),
                         fontSize: 12,
                       ),
                     ),
                     Text(
                       _formatDuration(safeDuration),
                       style: TextStyle(
-                        color: AppTheme.extensionOf(context)
-                  .selectedIconColor
-                  .withOpacity(0.72),
+                        color: AppTheme.extensionOf(
+                          context,
+                        ).selectedIconColor.withOpacity(0.72),
                         fontSize: 12,
                       ),
                     ),
@@ -673,8 +652,7 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
     final shuffleMode =
         playbackState?.shuffleMode ?? AudioServiceShuffleMode.none;
 
-    final repeatMode =
-        playbackState?.repeatMode ?? AudioServiceRepeatMode.none;
+    final repeatMode = playbackState?.repeatMode ?? AudioServiceRepeatMode.none;
 
     final isShuffleEnabled = shuffleMode != AudioServiceShuffleMode.none;
     final isRepeatEnabled = repeatMode != AudioServiceRepeatMode.none;
@@ -690,7 +668,9 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
               Icons.shuffle_rounded,
               color: isShuffleEnabled
                   ? AppTheme.extensionOf(context).accentColor
-                  : AppTheme.extensionOf(context).selectedIconColor.withOpacity(0.54),
+                  : AppTheme.extensionOf(
+                      context,
+                    ).selectedIconColor.withOpacity(0.54),
               size: 24,
             ),
           ),
@@ -703,8 +683,9 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
             padding: const EdgeInsets.symmetric(horizontal: 25),
             child: PlayMusicButtonWidget(
               onTap: () => _togglePlayPause(isPlaying),
-              enumPlayMusic:
-              isPlaying ? EnumPlayMusic.pause : EnumPlayMusic.play,
+              enumPlayMusic: isPlaying
+                  ? EnumPlayMusic.pause
+                  : EnumPlayMusic.play,
               isBigButton: true,
             ),
           ),
@@ -721,7 +702,9 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
                   : Icons.repeat_rounded,
               color: isRepeatEnabled
                   ? AppTheme.extensionOf(context).accentColor
-                  : AppTheme.extensionOf(context).selectedIconColor.withOpacity(0.54),
+                  : AppTheme.extensionOf(
+                      context,
+                    ).selectedIconColor.withOpacity(0.54),
               size: 24,
             ),
           ),

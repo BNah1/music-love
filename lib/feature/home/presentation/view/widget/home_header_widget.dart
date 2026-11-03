@@ -1,4 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:musiclove/core/constant/app_string.dart';
 import 'package:musiclove/core/constant/theme.dart';
 
 class HomeHeader extends StatelessWidget {
@@ -7,9 +9,12 @@ class HomeHeader extends StatelessWidget {
   final VoidCallback onScanPressed;
   final VoidCallback onSearchPressed;
 
-  const HomeHeader({super.key,
+  const HomeHeader({
+    super.key,
     required this.isScanning,
-    required this.onScanPressed, required this.isSearch, required this.onSearchPressed,
+    required this.onScanPressed,
+    required this.isSearch,
+    required this.onSearchPressed,
   });
 
   @override
@@ -25,62 +30,62 @@ class HomeHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Chào! 🌸🌸🌸',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: appTheme.subtitleColor,
-                ),
+                context.tr(AppString.homeGreeting),
+                style: TextStyle(fontSize: 16, color: appTheme.subtitleColor),
               ),
               Text(
-                'Bonah Music',
+                context.tr(AppString.homeTitle),
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: appTheme.textColor,
                 ),
               ),
-
             ],
           ),
-          buildAction(context, appTheme)
+          buildAction(context, appTheme),
         ],
       ),
     );
   }
-  
-  Widget buildAction(BuildContext context,AppThemeExtension appTheme){
-    return Row(children: [
-      buildIcon(context: context, icon: isScanning
-        ? const SizedBox(
-      width: 24,
-      height: 24,
-      child: CircularProgressIndicator(
-        strokeWidth: 2,
-      ),
-    )
-        : Icon(
-      Icons.sync_rounded,
-      color: appTheme.accentColor,
-    ),
-        isOn: isScanning, onPress: onScanPressed),
-      const SizedBox(width: 20,),
-      buildIcon(context: context, icon: isSearch
-          ? Icon(
-        Icons.search_off,
-        color: appTheme.softAccentColor,
-      )
-          : Icon(
-        Icons.search,
-        color: appTheme.accentColor,
-      ),
-          isOn: isScanning, onPress: onSearchPressed),],);
+
+  Widget buildAction(BuildContext context, AppThemeExtension appTheme) {
+    return Row(
+      children: [
+        buildIcon(
+          context: context,
+          icon: isScanning
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Icon(Icons.sync_rounded, color: appTheme.accentColor),
+          isOn: isScanning,
+          onPress: onScanPressed,
+        ),
+        const SizedBox(width: 20),
+        buildIcon(
+          context: context,
+          icon: isSearch
+              ? Icon(Icons.search_off, color: appTheme.softAccentColor)
+              : Icon(Icons.search, color: appTheme.accentColor),
+          isOn: isScanning,
+          onPress: onSearchPressed,
+        ),
+      ],
+    );
   }
 
+  Widget buildIcon({
+    required BuildContext context,
+    required Widget icon,
+    required bool isOn,
+    required VoidCallback onPress,
+  }) {
+    final appTheme = AppTheme.extensionOf(context);
 
-  Widget buildIcon({required BuildContext context, required Widget icon, required bool isOn, required VoidCallback onPress}){
-final appTheme = AppTheme.extensionOf(context);
-
-return GestureDetector(
+    return GestureDetector(
       onTap: isOn ? null : onPress,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
@@ -90,14 +95,9 @@ return GestureDetector(
               ? Theme.of(context).disabledColor
               : appTheme.cardBackground,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: appTheme.shadowColor,
-              blurRadius: 10,
-            ),
-          ],
+          boxShadow: [BoxShadow(color: appTheme.shadowColor, blurRadius: 10)],
         ),
-        child: icon
+        child: icon,
       ),
     );
   }

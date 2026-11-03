@@ -21,6 +21,7 @@ class SettingRepository {
 }
 
 class SettingKeys {
+  static const String languageCode = 'languageCode';
   static const String themeMode = 'themeMode';
   static const String themeStyle = 'themeStyle';
 

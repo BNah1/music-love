@@ -1,4 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:musiclove/core/constant/app_string.dart';
 import 'package:musiclove/core/constant/app_style.dart';
 
 class TabBarWidget extends StatelessWidget {
@@ -17,12 +19,15 @@ class TabBarWidget extends StatelessWidget {
       indicatorSize: TabBarIndicatorSize.tab,
       unselectedLabelColor: Colors.grey,
       labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
-      unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal,fontSize: 20),
+      unselectedLabelStyle: const TextStyle(
+        fontWeight: FontWeight.normal,
+        fontSize: 20,
+      ),
       labelColor: AppColor.primaryTextColorTitle,
       controller: tabController,
-      tabs: const [
-        Text('Payment'),
-        Text('InCome'),
+      tabs: [
+        Text(context.tr(AppString.tabSongs)),
+        Text(context.tr(AppString.tabPlaylists)),
       ],
     );
   }

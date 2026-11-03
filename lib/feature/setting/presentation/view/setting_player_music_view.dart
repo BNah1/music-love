@@ -1,4 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:musiclove/core/constant/app_string.dart';
 import 'package:musiclove/feature/setting/domain/repository/setting_repository.dart';
 import 'package:musiclove/feature/setting/presentation/view/widget/action_tile_widget.dart';
 import 'package:musiclove/feature/setting/presentation/view/widget/bottom_option_tile.dart';
@@ -16,7 +18,6 @@ class SettingPlayerMusicView extends StatefulWidget {
 class _SettingPlayerMusicViewState extends State<SettingPlayerMusicView> {
   final SettingRepository _repo = SettingRepository();
 
-
   late bool _resumeLastSong;
   late bool _defaultShuffle;
   late String _defaultRepeat;
@@ -29,8 +30,6 @@ class _SettingPlayerMusicViewState extends State<SettingPlayerMusicView> {
   }
 
   void _loadSettings() {
-
-
     _resumeLastSong = _repo.getBool(
       SettingKeys.resumeLastSong,
       defaultValue: true,
@@ -52,7 +51,6 @@ class _SettingPlayerMusicViewState extends State<SettingPlayerMusicView> {
     );
   }
 
-
   Future<void> _setDefaultRepeat(String value) async {
     await _repo.setString(SettingKeys.defaultRepeat, value);
 
@@ -67,36 +65,29 @@ class _SettingPlayerMusicViewState extends State<SettingPlayerMusicView> {
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đã xóa cache trình phát nhạc'),
-      ),
+      SnackBar(content: Text(context.tr(AppString.playerCacheCleared))),
     );
   }
-
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text('Trình phát nhạc'),),
-        body: _buildPlayerSection());
+      appBar: AppBar(title: Text(context.tr(AppString.settingsPlayer))),
+      body: _buildPlayerSection(context),
+    );
   }
 
-
-  Widget _buildPlayerSection() {
+  Widget _buildPlayerSection(BuildContext context) {
     return SettingCard(
-      title: 'Trình phát nhạc',
+      title: context.tr(AppString.settingsPlayer),
       icon: Icons.graphic_eq_rounded,
       children: [
         SwitchTile(
-          title: 'Tiếp tục bài đang nghe',
-          subtitle: 'Mở app lần sau có thể nghe tiếp bài đã pause',
+          title: context.tr(AppString.settingsPlayerResume),
+          subtitle: context.tr(AppString.settingsPlayerResumeDesc),
           value: _resumeLastSong,
           onChanged: (value) async {
-            await _repo.setBool(
-              SettingKeys.resumeLastSong,
-              value,
-            );
+            await _repo.setBool(SettingKeys.resumeLastSong, value);
 
             setState(() {
               _resumeLastSong = value;
@@ -104,14 +95,11 @@ class _SettingPlayerMusicViewState extends State<SettingPlayerMusicView> {
           },
         ),
         SwitchTile(
-          title: 'Mặc định phát ngẫu nhiên',
-          subtitle: 'Bật shuffle khi phát playlist',
+          title: context.tr(AppString.settingsPlayerDefaultShuffle),
+          subtitle: context.tr(AppString.settingsPlayerDefaultShuffleDesc),
           value: _defaultShuffle,
           onChanged: (value) async {
-            await _repo.setBool(
-              SettingKeys.defaultShuffle,
-              value,
-            );
+            await _repo.setBool(SettingKeys.defaultShuffle, value);
 
             setState(() {
               _defaultShuffle = value;
@@ -119,19 +107,16 @@ class _SettingPlayerMusicViewState extends State<SettingPlayerMusicView> {
           },
         ),
         SelectTile(
-          title: 'Chế độ lặp mặc định',
-          subtitle: _repeatLabel(_defaultRepeat),
-          onTap: _showRepeatModeSheet,
+          title: context.tr(AppString.settingsPlayerDefaultRepeat),
+          subtitle: _repeatLabel(context, _defaultRepeat),
+          onTap: () => _showRepeatModeSheet(context),
         ),
         SwitchTile(
-          title: 'Giữ notification khi pause',
-          subtitle: 'Dễ resume nhạc từ thanh thông báo',
+          title: context.tr(AppString.settingsPlayerKeepNotification),
+          subtitle: context.tr(AppString.settingsPlayerKeepNotificationDesc),
           value: _keepNotificationWhenPause,
           onChanged: (value) async {
-            await _repo.setBool(
-              SettingKeys.keepNotificationWhenPause,
-              value,
-            );
+            await _repo.setBool(SettingKeys.keepNotificationWhenPause, value);
 
             setState(() {
               _keepNotificationWhenPause = value;
@@ -139,8 +124,8 @@ class _SettingPlayerMusicViewState extends State<SettingPlayerMusicView> {
           },
         ),
         ActionTile(
-          title: 'Xóa cache trình phát',
-          subtitle: 'Xóa bài đang nghe, vị trí nghe và queue đã lưu',
+          title: context.tr(AppString.settingsPlayerClearCache),
+          subtitle: context.tr(AppString.settingsPlayerClearCacheDesc),
           icon: Icons.cleaning_services_outlined,
           onTap: _clearPlayerCache,
         ),
@@ -148,38 +133,37 @@ class _SettingPlayerMusicViewState extends State<SettingPlayerMusicView> {
     );
   }
 
-
-  Future<void> _showRepeatModeSheet() async {
+  Future<void> _showRepeatModeSheet(BuildContext context) async {
     await showModalBottomSheet(
       context: context,
       useRootNavigator: true,
       showDragHandle: true,
-      builder: (_) {
+      builder: (bottomSheetContext) {
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               BottomOptionTile(
-                title: 'Không lặp',
+                title: bottomSheetContext.tr(AppString.repeatNone),
                 selected: _defaultRepeat == 'none',
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(bottomSheetContext);
                   _setDefaultRepeat('none');
                 },
               ),
               BottomOptionTile(
-                title: 'Lặp tất cả',
+                title: bottomSheetContext.tr(AppString.repeatAll),
                 selected: _defaultRepeat == 'all',
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(bottomSheetContext);
                   _setDefaultRepeat('all');
                 },
               ),
               BottomOptionTile(
-                title: 'Lặp một bài',
+                title: bottomSheetContext.tr(AppString.repeatOne),
                 selected: _defaultRepeat == 'one',
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(bottomSheetContext);
                   _setDefaultRepeat('one');
                 },
               ),
@@ -190,16 +174,15 @@ class _SettingPlayerMusicViewState extends State<SettingPlayerMusicView> {
     );
   }
 
-
-  String _repeatLabel(String value) {
+  String _repeatLabel(BuildContext context, String value) {
     switch (value) {
       case 'all':
-        return 'Lặp tất cả';
+        return context.tr(AppString.repeatAll);
       case 'one':
-        return 'Lặp một bài';
+        return context.tr(AppString.repeatOne);
       case 'none':
       default:
-        return 'Không lặp';
+        return context.tr(AppString.repeatNone);
     }
   }
 }

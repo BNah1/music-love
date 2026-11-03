@@ -1,6 +1,8 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:musiclove/core/constant/app_string.dart';
 import 'package:musiclove/core/constant/routes.dart';
 import 'package:musiclove/core/constant/theme.dart';
 import 'package:musiclove/feature/playlist/presentation/provider/playlist_provider.dart';
@@ -9,9 +11,6 @@ import 'package:musiclove/feature/playlist/presentation/view/widget/edit_playlis
 class PlaylistView extends ConsumerWidget {
   const PlaylistView({super.key});
 
-
-
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appTheme = AppTheme.extensionOf(context);
@@ -19,24 +18,23 @@ class PlaylistView extends ConsumerWidget {
     final notifier = ref.read(playlistProvider.notifier);
     final playlists = state.playlists;
 
-
     Future<void> createPlaylist() async {
       final controller = TextEditingController();
 
       await showDialog(
         context: context,
         builder: (toastContext) => AlertDialog(
-          title: const Text('Tạo playlist'),
+          title: Text(toastContext.tr(AppString.playlistCreate)),
           content: TextField(
             controller: controller,
-            decoration: const InputDecoration(
-              hintText: 'Tên playlist',
+            decoration: InputDecoration(
+              hintText: toastContext.tr(AppString.playlistNameHint),
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(toastContext),
-              child: const Text('Hủy'),
+              child: Text(toastContext.tr(AppString.commonCancel)),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -49,7 +47,7 @@ class PlaylistView extends ConsumerWidget {
                   Navigator.pop(toastContext);
                 }
               },
-              child: const Text('Tạo'),
+              child: Text(toastContext.tr(AppString.commonCreate)),
             ),
           ],
         ),
@@ -57,9 +55,7 @@ class PlaylistView extends ConsumerWidget {
     }
 
     return Container(
-      decoration: BoxDecoration(
-        gradient: appTheme.backgroundGradient,
-      ),
+      decoration: BoxDecoration(gradient: appTheme.backgroundGradient),
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
@@ -73,12 +69,12 @@ class PlaylistView extends ConsumerWidget {
               ),
             ),
           ],
-          title: const Text('Playlist'),
+          title: Text(context.tr(AppString.playlistTitle)),
         ),
         body: playlists.isEmpty
             ? Center(
                 child: Text(
-                  'Chưa có playlist',
+                  context.tr(AppString.playlistEmpty),
                   style: TextStyle(color: appTheme.subtitleColor),
                 ),
               )
@@ -101,12 +97,13 @@ class PlaylistView extends ConsumerWidget {
                       ),
                     ),
                     subtitle: Text(
-                      '${p.songIds.length} bài hát',
+                      context.tr(
+                        AppString.playlistSongsCount,
+                        namedArgs: {'count': '${p.songIds.length}'},
+                      ),
                       style: TextStyle(color: appTheme.subtitleColor),
                     ),
-                    trailing: EditPlaylistWidget(
-                      playlist: p,
-                    ),
+                    trailing: EditPlaylistWidget(playlist: p),
                     onTap: () {
                       context.push(AppRoutes.playlistDetail(p.id));
                     },
