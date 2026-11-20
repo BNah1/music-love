@@ -71,7 +71,7 @@ class BottomNavWidget extends ConsumerWidget {
     return AnimatedAlign(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOutCirc,
-      alignment: Alignment(-1.0 + (currentIndex * 1.0), 0),
+      alignment: Alignment(menuItemsAlignment(currentIndex, length), 0),
       child: FractionallySizedBox(
         widthFactor: 1 / length,
         child: Container(
@@ -92,6 +92,9 @@ class BottomNavWidget extends ConsumerWidget {
       ),
     );
   }
+
+  double menuItemsAlignment(int index, int length) =>
+      length <= 1 ? 0 : -1 + (2 * index / (length - 1));
 
   Widget _buildNavItem(
     BuildContext context,

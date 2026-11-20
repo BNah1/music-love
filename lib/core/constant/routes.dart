@@ -13,6 +13,7 @@ import 'package:musiclove/feature/setting/presentation/view/setting_view.dart';
 import 'package:musiclove/feature/home/presentation/view/home_view.dart';
 import 'package:musiclove/feature/home/presentation/view/all_songs_view.dart';
 import 'package:musiclove/feature/play_music/presentation/view/play_music_view.dart';
+import 'package:musiclove/feature/online_url_youtube_streaming/presentation/view/online_audio_view.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'root',
@@ -28,6 +29,9 @@ final GlobalKey<NavigatorState> playlistNavigatorKey =
 final GlobalKey<NavigatorState> settingNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'setting',
 );
+final GlobalKey<NavigatorState> onlineNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'online',
+);
 
 class AppRoutes {
   ///////////////////////////////
@@ -36,6 +40,7 @@ class AppRoutes {
 
   static const String home = '/home';
   static const String playList = '/playList';
+  static const String online = '/online';
   static const String playMusic = '/playMusic';
   static const String playlistSongPicker = '/playlistSongPicker';
   static const String allSongs = '/allSongs';
@@ -81,6 +86,16 @@ class AppRoutes {
             ],
           ),
 
+          StatefulShellBranch(
+            navigatorKey: onlineNavigatorKey,
+            routes: [
+              GoRoute(
+                path: online,
+                pageBuilder: (context, state) =>
+                    const CupertinoPage(child: OnlineAudioView()),
+              ),
+            ],
+          ),
           StatefulShellBranch(
             navigatorKey: settingNavigatorKey,
             routes: [

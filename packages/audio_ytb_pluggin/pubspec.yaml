@@ -1,0 +1,16 @@
+name: audio_ytb_pluggin
+description: Experimental Android YouTube audio source resolver.
+version: 0.0.1
+publish_to: none
+environment:
+  sdk: ^3.8.0
+  flutter: '>=3.22.0'
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.bonah.audio_ytb_pluggin
+        pluginClass: AudioYtbPlugginPlugin

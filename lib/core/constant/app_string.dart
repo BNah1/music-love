@@ -6,6 +6,11 @@ class AppString {
   static const String appName = 'app_name';
   static const String tabHome = 'tab_home';
   static const String tabLibrary = 'tab_library';
+  static const String tabOnline = 'tab_online';
+  static const String onlineUrlHint = 'online_url_hint';
+  static const String onlineOpen = 'online_open';
+  static const String onlineInvalidUrl = 'online_invalid_url';
+  static const String onlinePending = 'online_pending';
   static const String tabSettings = 'tab_settings';
   static const String tabSongs = 'tab_songs';
   static const String tabPlaylists = 'tab_playlists';

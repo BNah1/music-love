@@ -6,6 +6,13 @@ import 'package:just_audio/just_audio.dart';
 
 class MusicAudioHandler extends BaseAudioHandler
     with QueueHandler, SeekHandler {
+  MusicAudioHandler({this.onBeforePlay}) {
+    _listenPlaybackState();
+    _listenCurrentIndex();
+    _listenPositionCache();
+  }
+
+  final Future<void> Function()? onBeforePlay;
   final AudioPlayer _player = AudioPlayer();
 
   AudioServiceShuffleMode _shuffleMode = AudioServiceShuffleMode.none;
@@ -14,12 +21,6 @@ class MusicAudioHandler extends BaseAudioHandler
   Timer? _cacheTimer;
   Future<void> _modeChangeQueue = Future<void>.value();
   bool _isResettingCompletion = false;
-
-  MusicAudioHandler() {
-    _listenPlaybackState();
-    _listenCurrentIndex();
-    _listenPositionCache();
-  }
 
   void _listenPlaybackState() {
     _player.playbackEventStream.listen((event) {
@@ -224,6 +225,7 @@ class MusicAudioHandler extends BaseAudioHandler
 
   @override
   Future<void> play() async {
+    await onBeforePlay?.call();
     await _player.play();
     await _saveLastSession();
   }
