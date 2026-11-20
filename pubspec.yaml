@@ -8,6 +8,8 @@ environment:
   sdk: ^3.8.0
 
 dependencies:
+  audio_ytb_pluggin:
+    path: packages/audio_ytb_pluggin
   flutter:
     sdk: flutter
   flutter_localizations:

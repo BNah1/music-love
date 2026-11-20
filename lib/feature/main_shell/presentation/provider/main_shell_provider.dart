@@ -28,6 +28,12 @@ class MainShellProvider extends Notifier<int> {
     ),
     MenuItem(
       index: 2,
+      path: AppRoutes.online,
+      icon: Icons.language_rounded,
+      label: AppString.tabOnline,
+    ),
+    MenuItem(
+      index: 3,
       path: AppRoutes.setting,
       icon: Icons.settings_rounded,
       label: AppString.tabSettings,
@@ -52,6 +58,7 @@ class MainShellProvider extends Notifier<int> {
   final List<String> appRoutes = [
     AppRoutes.home,
     AppRoutes.playList,
+    AppRoutes.online,
     AppRoutes.setting,
   ];
 }

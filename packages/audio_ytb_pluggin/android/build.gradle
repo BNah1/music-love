@@ -1,0 +1,24 @@
+group 'com.bonah.audio_ytb_pluggin'
+version '1.0'
+
+buildscript {
+    repositories { google(); mavenCentral() }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.7.3'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0'
+    }
+}
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    namespace 'com.bonah.audio_ytb_pluggin'
+    compileSdk 35
+    defaultConfig { minSdk 21 }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+repositories { google(); mavenCentral(); maven { url 'https://jitpack.io' } }
+dependencies {
+    implementation 'com.github.TeamNewPipe:NewPipeExtractor:v0.26.3'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+}

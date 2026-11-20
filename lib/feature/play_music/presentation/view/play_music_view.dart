@@ -10,6 +10,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:musiclove/core/constant/theme.dart';
 import 'package:musiclove/feature/library/data/model/mp3_file_model.dart';
 import 'package:musiclove/core/provider/audio_handler_provider.dart';
+import 'package:musiclove/core/audio/coordinated_audio_handler.dart';
 import 'package:musiclove/shared/widget/player_display_widgets.dart';
 
 import '../../../../core/audio/music_audio_handler.dart';
@@ -109,6 +110,8 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
       final isCurrentSong = currentItem?.id == song.id;
       final isSameQueue = listEquals(currentQueueIds, targetQueueIds);
 
+      final coordinator = ref.read(coordinatedAudioHandlerProvider);
+
       // Nếu chỉ mở màn hình bài đang phát thì không prepare lại player.
       // Prepare lại queue sẽ làm just_audio setAudioSources() và vị trí phát quay về đầu bài.
       if (!isCurrentSong) {
@@ -126,6 +129,9 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
         } else {
           audioHandler.playMediaItem(targetItems[startIndex]);
         }
+      } else if (coordinator.activeSource == PlaybackSource.online) {
+        // Chọn lại bài offline đang giữ trong queue cũng phải chuyển nguồn.
+        audioHandler.play();
       }
 
       setState(() {
@@ -356,34 +362,39 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
 
                       _syncRotationAnimation(isPlaying);
 
-                      return Column(
-                        children: [
-                          const Spacer(),
-                          PlayerArtwork(
-                            rotation: _animationController,
-                            isPlaying: isPlaying,
-                            artworkPath:
-                                mediaItem?.artUri?.toFilePath() ??
-                                displaySong?.artworkPath,
-                          ),
-                          const SizedBox(height: 40),
-                          PlayerSongInfo(
-                            title: mediaItem?.title ?? displaySong?.title ?? '',
-                            artist:
-                                mediaItem?.artist ?? displaySong?.artist ?? '',
-                          ),
-                          const SizedBox(height: 30),
-                          _buildProgressBar(
-                            duration:
-                                mediaItem?.duration ??
-                                Duration(
-                                  milliseconds: displaySong?.duration ?? 0,
-                                ),
-                          ),
-                          const SizedBox(height: 20),
-                          _buildControlPanel(playbackState),
-                          const Spacer(flex: 2),
-                        ],
+                      return SafeArea(
+                        child: Column(
+                          children: [
+                            const Spacer(flex: 2),
+                            PlayerArtwork(
+                              rotation: _animationController,
+                              isPlaying: isPlaying,
+                              artworkPath:
+                                  mediaItem?.artUri?.toFilePath() ??
+                                  displaySong?.artworkPath,
+                            ),
+                            const SizedBox(height: 32),
+                            PlayerSongInfo(
+                              title:
+                                  mediaItem?.title ?? displaySong?.title ?? '',
+                              artist:
+                                  mediaItem?.artist ??
+                                  displaySong?.artist ??
+                                  '',
+                            ),
+                            const Spacer(),
+                            _buildProgressBar(
+                              duration:
+                                  mediaItem?.duration ??
+                                  Duration(
+                                    milliseconds: displaySong?.duration ?? 0,
+                                  ),
+                            ),
+                            const SizedBox(height: 12),
+                            _buildControlPanel(playbackState),
+                            const Spacer(),
+                          ],
+                        ),
                       );
                     },
                   );
@@ -528,6 +539,18 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
       onPlayPause: () => _togglePlayPause(isPlaying),
       onNext: _skipToNext,
       onRepeat: () => _toggleRepeat(repeatMode),
+      onRewind: () {
+        final position = playbackState?.position ?? Duration.zero;
+        _seekTo(
+          position > const Duration(seconds: 15)
+              ? position - const Duration(seconds: 15)
+              : Duration.zero,
+        );
+      },
+      onForward: () => _seekTo(
+        (playbackState?.position ?? Duration.zero) +
+            const Duration(seconds: 15),
+      ),
     );
   }
 }

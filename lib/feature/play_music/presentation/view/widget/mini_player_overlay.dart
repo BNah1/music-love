@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../core/constant/routes.dart';
 import '../../../../../core/provider/audio_handler_provider.dart';
+import '../../../../../core/audio/coordinated_audio_handler.dart';
 import '../../../../../shared/widget/player_display_widgets.dart';
 
 class MiniPlayerOverlay extends ConsumerWidget {
@@ -12,7 +13,7 @@ class MiniPlayerOverlay extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final audioHandler = ref.watch(audioHandlerProvider);
+    final audioHandler = ref.watch(coordinatedAudioHandlerProvider);
 
     return StreamBuilder<MediaItem?>(
       stream: audioHandler.mediaItem,
@@ -28,9 +29,15 @@ class MiniPlayerOverlay extends ConsumerWidget {
             return MiniPlayerDisplay(
               title: item.title,
               artist: item.artist ?? '',
-              artworkPath: item.artUri?.toFilePath(),
+              artworkPath: audioHandler.activeSource == PlaybackSource.offline
+                  ? item.artUri?.toFilePath()
+                  : null,
               isPlaying: isPlaying,
               onOpen: () {
+                if (audioHandler.activeSource == PlaybackSource.online) {
+                  context.push(AppRoutes.onlinePlayer);
+                  return;
+                }
                 final path = item.extras?['path'] as String?;
                 final playlistId = item.extras?['playlistId'] as String?;
                 if (path == null) return;

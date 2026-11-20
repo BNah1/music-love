@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'app.dart';
-import 'core/audio/music_audio_handler.dart';
+import 'core/audio/coordinated_audio_handler.dart';
 import 'core/constant/app_assets.dart';
 import 'core/constant/app_config.dart';
 import 'core/provider/audio_handler_provider.dart';
@@ -21,10 +21,11 @@ Future<void> main() async {
   await Hive.openBox(AppConfig.boxPlaylists);
   await Hive.openBox(AppConfig.boxPlayerCache);
   await Hive.openBox(AppConfig.boxSettings);
+  await Hive.openBox(AppConfig.boxOnlineHistory);
 
   // Khởi tạo audio service chạy toàn app.
   final audioHandler = await AudioService.init(
-    builder: () => MusicAudioHandler(),
+    builder: () => CoordinatedAudioHandler(),
     config: const AudioServiceConfig(
       androidNotificationChannelId: AppConfig.androidNotificationChannelId,
       androidNotificationChannelName: AppConfig.androidNotificationChannelName,
@@ -40,7 +41,10 @@ Future<void> main() async {
       fallbackLocale: AppConfig.fallbackLocale,
       startLocale: AppConfig.defaultLocale,
       child: ProviderScope(
-        overrides: [audioHandlerProvider.overrideWithValue(audioHandler)],
+        overrides: [
+          audioHandlerProvider.overrideWithValue(audioHandler.offline),
+          coordinatedAudioHandlerProvider.overrideWithValue(audioHandler),
+        ],
         child: const MyApp(),
       ),
     ),
