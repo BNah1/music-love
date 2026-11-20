@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:musiclove/core/constant/routes.dart';
 import 'package:musiclove/core/constant/theme.dart';
 import 'package:musiclove/feature/main_shell/presentation/provider/main_shell_provider.dart';
 import 'package:musiclove/feature/main_shell/presentation/state/menu_item.dart';
@@ -39,7 +38,12 @@ class BottomNavWidget extends ConsumerWidget {
         ),
         child: Stack(
           children: [
-            _buildAnimatedIndicator(context, currentIndex, appTheme, menuItems.length),
+            _buildAnimatedIndicator(
+              context,
+              currentIndex,
+              appTheme,
+              menuItems.length,
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: menuItems.map((item) {
@@ -58,7 +62,12 @@ class BottomNavWidget extends ConsumerWidget {
     );
   }
 
-  Widget _buildAnimatedIndicator(BuildContext context, int currentIndex, AppThemeExtension appTheme, int length) {
+  Widget _buildAnimatedIndicator(
+    BuildContext context,
+    int currentIndex,
+    AppThemeExtension appTheme,
+    int length,
+  ) {
     return AnimatedAlign(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOutCirc,
@@ -85,12 +94,12 @@ class BottomNavWidget extends ConsumerWidget {
   }
 
   Widget _buildNavItem(
-      BuildContext context,
-      WidgetRef ref,
-      MenuItem item,
-      int currentIndex,
-      AppThemeExtension appTheme,
-      ) {
+    BuildContext context,
+    WidgetRef ref,
+    MenuItem item,
+    int currentIndex,
+    AppThemeExtension appTheme,
+  ) {
     final bool isSelected = currentIndex == item.index;
 
     return Expanded(
@@ -108,7 +117,9 @@ class BottomNavWidget extends ConsumerWidget {
               scale: isSelected ? 1.1 : 1.0,
               child: Icon(
                 item.icon,
-                color: isSelected ? appTheme.selectedIconColor : appTheme.unselectedIconColor,
+                color: isSelected
+                    ? appTheme.selectedIconColor
+                    : appTheme.unselectedIconColor,
                 size: 26,
               ),
             ),
@@ -117,5 +128,4 @@ class BottomNavWidget extends ConsumerWidget {
       ),
     );
   }
-
 }

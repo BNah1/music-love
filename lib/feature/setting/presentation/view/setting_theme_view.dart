@@ -1,4 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:musiclove/core/constant/app_string.dart';
 import 'package:musiclove/core/constant/theme.dart';
 import 'package:musiclove/feature/setting/domain/repository/setting_repository.dart';
 import 'package:musiclove/feature/setting/presentation/view/widget/option_tile_widget.dart';
@@ -16,7 +18,6 @@ class _SettingThemeViewState extends State<SettingThemeView> {
   late String _themeMode;
   late String _themeStyle;
 
-
   @override
   void initState() {
     _loadSettings();
@@ -24,18 +25,13 @@ class _SettingThemeViewState extends State<SettingThemeView> {
   }
 
   void _loadSettings() {
-    _themeMode = _repo.getString(
-      SettingKeys.themeMode,
-      defaultValue: 'system',
-    );
+    _themeMode = _repo.getString(SettingKeys.themeMode, defaultValue: 'system');
 
     _themeStyle = _repo.getString(
       SettingKeys.themeStyle,
       defaultValue: AppThemePreset.musicLove.value,
     );
   }
-
-
 
   Future<void> _setThemeMode(String value) async {
     await _repo.setString(SettingKeys.themeMode, value);
@@ -57,33 +53,33 @@ class _SettingThemeViewState extends State<SettingThemeView> {
     final selectedPreset = AppTheme.presetFromString(_themeStyle);
 
     return SettingCard(
-      title: 'Chủ đề',
+      title: context.tr(AppString.settingsTheme),
       icon: Icons.palette_outlined,
       children: [
         OptionTile(
-          title: 'Theo hệ thống',
-          subtitle: 'Tự đổi sáng/tối theo thiết bị',
+          title: context.tr(AppString.settingsThemeSystem),
+          subtitle: context.tr(AppString.settingsThemeSystemDesc),
           selected: _themeMode == 'system',
           onTap: () => _setThemeMode('system'),
         ),
         OptionTile(
-          title: 'Sáng',
-          subtitle: 'Luôn dùng giao diện sáng',
+          title: context.tr(AppString.settingsThemeLight),
+          subtitle: context.tr(AppString.settingsThemeLightDesc),
           selected: _themeMode == 'light',
           onTap: () => _setThemeMode('light'),
         ),
         OptionTile(
-          title: 'Tối',
-          subtitle: 'Luôn dùng giao diện tối',
+          title: context.tr(AppString.settingsThemeDark),
+          subtitle: context.tr(AppString.settingsThemeDarkDesc),
           selected: _themeMode == 'dark',
           onTap: () => _setThemeMode('dark'),
         ),
+
         // const _SettingDivider(),
 
         // const _SettingSubTitle(title: 'Kiểu giao diện'),
-
         ...AppThemePreset.values.map(
-              (preset) => _ThemePresetTile(
+          (preset) => _ThemePresetTile(
             preset: preset,
             selected: selectedPreset == preset,
             onTap: () => _setThemeStyle(preset.value),
@@ -96,12 +92,11 @@ class _SettingThemeViewState extends State<SettingThemeView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text('Chủ đề'),),
-        body: _buildThemeSection());
+      appBar: AppBar(title: Text(context.tr(AppString.settingsTheme))),
+      body: _buildThemeSection(),
+    );
   }
 }
-
-
 
 class _ThemePresetTile extends StatelessWidget {
   const _ThemePresetTile({
@@ -149,14 +144,11 @@ class _ThemePresetTile extends StatelessWidget {
       ),
       subtitle: Text(preset.subtitle),
       trailing: selected
-          ? Icon(
-        Icons.check_circle_rounded,
-        color: appTheme.accentColor,
-      )
+          ? Icon(Icons.check_circle_rounded, color: appTheme.accentColor)
           : Icon(
-        Icons.circle_outlined,
-        color: appTheme.unselectedIconColor.withOpacity(0.45),
-      ),
+              Icons.circle_outlined,
+              color: appTheme.unselectedIconColor.withOpacity(0.45),
+            ),
     );
   }
 }

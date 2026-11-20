@@ -6,24 +6,18 @@ import 'package:musiclove/feature/playlist/presentation/state/playlist_state.dar
 import 'package:musiclove/shared/entity/playlist_detail_enity.dart';
 import 'package:musiclove/shared/entity/playlist_entity.dart';
 
-final playlistProvider =
-StateNotifierProvider<PlaylistNotifier, PlaylistState>((ref) {
-  final repository = ref.read(playlistRepositoryProvider);
+final playlistProvider = StateNotifierProvider<PlaylistNotifier, PlaylistState>(
+  (ref) {
+    final repository = ref.read(playlistRepositoryProvider);
 
-  return PlaylistNotifier(
-    repository: repository,
-  )..loadPlaylists();
-});
+    return PlaylistNotifier(repository: repository)..loadPlaylists();
+  },
+);
 
-
-class PlaylistNotifier extends StateNotifier<PlaylistState>{
-
+class PlaylistNotifier extends StateNotifier<PlaylistState> {
   final PlaylistRepository repository;
 
-  PlaylistNotifier({
-    required this.repository,
-  }) : super(const PlaylistState());
-
+  PlaylistNotifier({required this.repository}) : super(const PlaylistState());
 
   Future<void> loadPlaylists() async {
     stateLoading();
@@ -36,7 +30,7 @@ class PlaylistNotifier extends StateNotifier<PlaylistState>{
     }
   }
 
-  Future<void> getDetailPlaylistById(String playlistId) async{
+  Future<void> getDetailPlaylistById(String playlistId) async {
     try {
       final playlist = await repository.getPlaylistDetail(playlistId);
       stateLoadedCurrentPlaylist(playlist);
@@ -95,7 +89,10 @@ class PlaylistNotifier extends StateNotifier<PlaylistState>{
     required String songId,
   }) async {
     try {
-      await repository.removeSongFromPlaylist(playlistId: playlistId, songId: songId);
+      await repository.removeSongFromPlaylist(
+        playlistId: playlistId,
+        songId: songId,
+      );
       await loadPlaylists();
     } catch (e) {
       stateError(e.toString());
@@ -146,11 +143,10 @@ class PlaylistNotifier extends StateNotifier<PlaylistState>{
     }
   }
 
-
   Future<void> moveSongUp({
     required String playlistId,
     required String songId,
-  })async {
+  }) async {
     try {
       await repository.moveSongUp(playlistId: playlistId, songId: songId);
       await loadPlaylists();
@@ -162,7 +158,7 @@ class PlaylistNotifier extends StateNotifier<PlaylistState>{
   Future<void> moveSongDown({
     required String playlistId,
     required String songId,
-  })async {
+  }) async {
     try {
       await repository.moveSongDown(playlistId: playlistId, songId: songId);
       await loadPlaylists();
@@ -174,7 +170,7 @@ class PlaylistNotifier extends StateNotifier<PlaylistState>{
   Future<void> moveSongToTop({
     required String playlistId,
     required String songId,
-  })async {
+  }) async {
     try {
       await repository.moveSongToTop(playlistId: playlistId, songId: songId);
       await loadPlaylists();
@@ -186,7 +182,7 @@ class PlaylistNotifier extends StateNotifier<PlaylistState>{
   Future<void> moveSongToBottom({
     required String playlistId,
     required String songId,
-  })async {
+  }) async {
     try {
       await repository.moveSongToBottom(playlistId: playlistId, songId: songId);
       await loadPlaylists();
@@ -198,19 +194,54 @@ class PlaylistNotifier extends StateNotifier<PlaylistState>{
   Future<void> addSongToPlaylist({
     required String playlistId,
     required String songId,
-  })async {
+  }) async {
     try {
-      await repository.addSongToPlaylist(playlistId: playlistId, songId: songId);
+      await repository.addSongToPlaylist(
+        playlistId: playlistId,
+        songId: songId,
+      );
       await loadPlaylists();
     } catch (e) {
       stateError(e.toString());
     }
   }
 
+  Future<void> addSongsToPlaylists({
+    required List<String> playlistIds,
+    required List<String> songIds,
+  }) async {
+    try {
+      await repository.addSongsToPlaylists(
+        playlistIds: playlistIds,
+        songIds: songIds,
+      );
+      await loadPlaylists();
+    } catch (e) {
+      stateError(e.toString());
+    }
+  }
+
+  Future<void> reorderSongs({
+    required String playlistId,
+    required int oldIndex,
+    required int newIndex,
+  }) async {
+    try {
+      await repository.reorderSongs(
+        playlistId: playlistId,
+        oldIndex: oldIndex,
+        newIndex: newIndex,
+      );
+      await loadPlaylists();
+      await getDetailPlaylistById(playlistId);
+    } catch (e) {
+      stateError(e.toString());
+    }
+  }
 
   ///////////////////////////////
 
-  void stateLoadedPlaylists(List<PlaylistEntity> playlists){
+  void stateLoadedPlaylists(List<PlaylistEntity> playlists) {
     state = state.copyWith(
       playlists: playlists,
       status: playlists.isEmpty ? BaseStatus.empty : BaseStatus.loaded,
@@ -218,7 +249,7 @@ class PlaylistNotifier extends StateNotifier<PlaylistState>{
     );
   }
 
-  void stateLoadedCurrentPlaylist(PlaylistDetailEntity? playlist){
+  void stateLoadedCurrentPlaylist(PlaylistDetailEntity? playlist) {
     state = state.copyWith(
       currentPlaylist: playlist,
       status: playlist != null ? BaseStatus.empty : BaseStatus.loaded,
@@ -226,25 +257,15 @@ class PlaylistNotifier extends StateNotifier<PlaylistState>{
     );
   }
 
-  void stateLoading(){
-    state = state.copyWith(
-      status: BaseStatus.loading,
-      errorMessage: '',
-    );
+  void stateLoading() {
+    state = state.copyWith(status: BaseStatus.loading, errorMessage: '');
   }
 
-  void stateError(String error){
-    state = state.copyWith(
-      status: BaseStatus.error,
-      errorMessage: error,
-    );
+  void stateError(String error) {
+    state = state.copyWith(status: BaseStatus.error, errorMessage: error);
   }
 
-  void stateScanning(){
-    state = state.copyWith(
-      status: BaseStatus.loading,
-      errorMessage: '',
-    );
+  void stateScanning() {
+    state = state.copyWith(status: BaseStatus.loading, errorMessage: '');
   }
-
 }

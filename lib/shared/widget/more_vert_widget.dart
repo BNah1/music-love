@@ -1,7 +1,11 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:musiclove/core/constant/app_string.dart';
 import 'package:musiclove/core/constant/theme.dart';
+import 'package:musiclove/core/widget/app_overlay.dart';
 import 'package:musiclove/feature/playlist/presentation/provider/playlist_provider.dart';
+import 'package:musiclove/feature/playlist/presentation/view/widget/playlist_name_dialog.dart';
 import 'package:musiclove/shared/entity/mp3_file_entity.dart';
 
 enum _MusicAction {
@@ -56,18 +60,19 @@ class MoreVertWidget extends ConsumerWidget {
         side: BorderSide(color: appTheme.shadowColor.withOpacity(0.05)),
       ),
       onSelected: (action) => _handleMusicAction(context, ref, action),
-      itemBuilder: (context) => _buildMenuItems(appTheme),
+      itemBuilder: (context) => _buildMenuItems(context, appTheme),
     );
   }
 
   List<PopupMenuEntry<_MusicAction>> _buildMenuItems(
+    BuildContext context,
     AppThemeExtension appTheme,
   ) {
     return [
       _buildPopupItem(
         value: _MusicAction.addToPlaylist,
         icon: Icons.playlist_add_rounded,
-        label: 'Thêm vào playlist',
+        label: context.tr(AppString.menuAddToPlaylist),
         appTheme: appTheme,
       ),
       if (currentPlaylistId != null) ...[
@@ -75,32 +80,32 @@ class MoreVertWidget extends ConsumerWidget {
         _buildPopupItem(
           value: _MusicAction.moveToTop,
           icon: Icons.vertical_align_top_rounded,
-          label: 'Đưa lên đầu',
+          label: context.tr(AppString.menuMoveToTop),
           appTheme: appTheme,
         ),
         _buildPopupItem(
           value: _MusicAction.moveUp,
           icon: Icons.keyboard_arrow_up_rounded,
-          label: 'Đưa lên 1 vị trí',
+          label: context.tr(AppString.menuMoveUp),
           appTheme: appTheme,
         ),
         _buildPopupItem(
           value: _MusicAction.moveDown,
           icon: Icons.keyboard_arrow_down_rounded,
-          label: 'Đưa xuống 1 vị trí',
+          label: context.tr(AppString.menuMoveDown),
           appTheme: appTheme,
         ),
         _buildPopupItem(
           value: _MusicAction.moveToBottom,
           icon: Icons.vertical_align_bottom_rounded,
-          label: 'Đưa xuống cuối',
+          label: context.tr(AppString.menuMoveToBottom),
           appTheme: appTheme,
         ),
         const PopupMenuDivider(height: 1),
         _buildPopupItem(
           value: _MusicAction.removeFromPlaylist,
           icon: Icons.delete_outline_rounded,
-          label: 'Xóa khỏi playlist',
+          label: context.tr(AppString.menuRemoveFromPlaylist),
           appTheme: appTheme,
           isDanger: true,
         ),
@@ -170,7 +175,6 @@ class MoreVertWidget extends ConsumerWidget {
     required BuildContext context,
     required WidgetRef ref,
   }) async {
-    final appTheme = AppTheme.extensionOf(context);
     final notifier = ref.read(playlistProvider.notifier);
 
     await notifier.loadPlaylists();
@@ -178,21 +182,10 @@ class MoreVertWidget extends ConsumerWidget {
 
     if (!context.mounted) return;
 
-    if (playlists.isEmpty) {
-      _showSnackBar(context, 'Chưa có playlist nào');
-      return;
-    }
-
-    await showModalBottomSheet(
+    await AppOverlay.showSheet(
       context: context,
-      backgroundColor: appTheme.navBackground,
-      showDragHandle: true,
-      useRootNavigator: true,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
       builder: (bottomSheetContext) {
+        final appTheme = AppTheme.extensionOf(bottomSheetContext);
         final maxHeight = MediaQuery.sizeOf(bottomSheetContext).height * 0.62;
         return SafeArea(
           child: Padding(
@@ -205,7 +198,7 @@ class MoreVertWidget extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        'Thêm vào playlist',
+                        bottomSheetContext.tr(AppString.playlistAddTo),
                         style: TextStyle(
                           color: appTheme.selectedIconColor,
                           fontSize: 20,
@@ -214,7 +207,7 @@ class MoreVertWidget extends ConsumerWidget {
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Đóng',
+                      tooltip: bottomSheetContext.tr(AppString.commonClose),
                       onPressed: () => Navigator.pop(bottomSheetContext),
                       icon: Icon(
                         Icons.close_rounded,
@@ -224,7 +217,10 @@ class MoreVertWidget extends ConsumerWidget {
                   ],
                 ),
                 Text(
-                  'Chọn nơi lưu “${song.title}”',
+                  bottomSheetContext.tr(
+                    AppString.playlistChooseSave,
+                    namedArgs: {'title': song.title},
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -232,90 +228,134 @@ class MoreVertWidget extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: maxHeight),
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: playlists.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (_, index) {
-                      final playlist = playlists[index];
-                      final alreadyAdded = playlist.songIds.contains(song.id);
-                      return Material(
-                        color: appTheme.cardBackground,
-                        borderRadius: BorderRadius.circular(16),
-                        child: InkWell(
+                if (playlists.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Center(
+                      child: Text(
+                        bottomSheetContext.tr(AppString.playlistNoPlaylistsYet),
+                        style: TextStyle(color: appTheme.subtitleColor),
+                      ),
+                    ),
+                  )
+                else
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: maxHeight),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: playlists.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemBuilder: (_, index) {
+                        final playlist = playlists[index];
+                        final alreadyAdded = playlist.songIds.contains(song.id);
+                        return Material(
+                          color: appTheme.cardBackground,
                           borderRadius: BorderRadius.circular(16),
-                          onTap: alreadyAdded
-                              ? null
-                              : () async {
-                                  await notifier.addSongToPlaylist(
-                                    playlistId: playlist.id,
-                                    songId: song.id,
-                                  );
-                                  if (bottomSheetContext.mounted) {
-                                    Navigator.pop(bottomSheetContext);
-                                    _showSnackBar(
-                                      context,
-                                      'Đã thêm vào ${playlist.name}',
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: alreadyAdded
+                                ? null
+                                : () async {
+                                    await notifier.addSongToPlaylist(
+                                      playlistId: playlist.id,
+                                      songId: song.id,
                                     );
-                                  }
-                                  onChanged?.call();
-                                },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 10,
-                            ),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  backgroundColor: appTheme.softAccentColor,
-                                  child: Icon(
-                                    Icons.queue_music_rounded,
-                                    color: appTheme.accentColor,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        playlist.name,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          color: appTheme.textColor,
-                                          fontWeight: FontWeight.w600,
+                                    if (bottomSheetContext.mounted) {
+                                      Navigator.pop(bottomSheetContext);
+                                      AppOverlay.showToast(
+                                        context,
+                                        context.tr(
+                                          AppString.playlistAdded,
+                                          namedArgs: {'name': playlist.name},
                                         ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        '${playlist.songIds.length} bài hát',
-                                        style: TextStyle(
-                                          color: appTheme.subtitleColor,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ],
+                                      );
+                                    }
+                                    onChanged?.call();
+                                  },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 10,
+                              ),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor: appTheme.softAccentColor,
+                                    child: Icon(
+                                      Icons.queue_music_rounded,
+                                      color: appTheme.accentColor,
+                                    ),
                                   ),
-                                ),
-                                Icon(
-                                  alreadyAdded
-                                      ? Icons.check_circle_rounded
-                                      : Icons.add_circle_outline_rounded,
-                                  color: alreadyAdded
-                                      ? appTheme.accentColor
-                                      : appTheme.subtitleColor,
-                                ),
-                              ],
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          playlist.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: appTheme.textColor,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          bottomSheetContext.tr(
+                                            AppString.playlistSongsCount,
+                                            namedArgs: {
+                                              'count':
+                                                  '${playlist.songIds.length}',
+                                            },
+                                          ),
+                                          style: TextStyle(
+                                            color: appTheme.subtitleColor,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Icon(
+                                    alreadyAdded
+                                        ? Icons.check_circle_rounded
+                                        : Icons.add_circle_outline_rounded,
+                                    color: alreadyAdded
+                                        ? appTheme.accentColor
+                                        : appTheme.subtitleColor,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
+                        );
+                      },
+                    ),
+                  ),
+                const Divider(height: 20),
+                InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () async {
+                    Navigator.pop(bottomSheetContext);
+                    await _showCreatePlaylistModal(context, notifier);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Row(
+                      children: [
+                        Icon(Icons.add_rounded, color: appTheme.accentColor),
+                        const SizedBox(width: 12),
+                        Text(
+                          bottomSheetContext.tr(AppString.playlistCreateNew),
+                          style: TextStyle(
+                            color: appTheme.textColor,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      );
-                    },
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -324,6 +364,19 @@ class MoreVertWidget extends ConsumerWidget {
         );
       },
     );
+  }
+
+  Future<void> _showCreatePlaylistModal(
+    BuildContext context,
+    PlaylistNotifier notifier,
+  ) async {
+    final name = await showPlaylistNameDialog(
+      context: context,
+      title: context.tr(AppString.playlistCreate),
+      submitLabel: context.tr(AppString.commonCreate),
+    );
+    if (name == null || name.isEmpty) return;
+    await notifier.createPlaylist(name);
   }
 
   // --- HELPER LOGIC METHODS ---
@@ -376,18 +429,8 @@ class MoreVertWidget extends ConsumerWidget {
     await onRemoveFromAudioHandler?.call(song.id);
 
     if (context.mounted) {
-      _showSnackBar(context, 'Đã xóa khỏi playlist');
+      AppOverlay.showToast(context, context.tr(AppString.playlistRemoved));
     }
     onChanged?.call();
-  }
-
-  void _showSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
   }
 }

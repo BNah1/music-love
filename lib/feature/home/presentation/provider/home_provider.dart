@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:musiclove/core/constant/app_enum.dart';
+import 'package:musiclove/core/constant/song_sort_option.dart';
 import 'package:musiclove/feature/home/presentation/state/home_state.dart';
 import 'package:musiclove/feature/library/domain/repository/song_repository.dart';
 import 'package:musiclove/feature/library/presentation/provider/library_provider.dart';
@@ -40,6 +41,10 @@ class HomeNotifier extends StateNotifier<HomeState> {
 
   void clearSearch() {
     state = state.copyWith(searchQuery: '');
+  }
+
+  void changeSort(SongSortOption option) {
+    state = state.copyWith(sortOption: option);
   }
 
   Future<void> scanSongs() async {

@@ -4,27 +4,32 @@ import 'package:go_router/go_router.dart';
 import 'package:musiclove/feature/main_shell/presentation/view/main_shell_view.dart';
 import 'package:musiclove/feature/playlist/presentation/view/playlist_detail_view.dart';
 import 'package:musiclove/feature/playlist/presentation/view/playlist_view.dart';
+import 'package:musiclove/feature/playlist/presentation/view/playlist_song_picker_view.dart';
 import 'package:musiclove/feature/setting/presentation/view/setting_headphone_bluetooth_view.dart';
 import 'package:musiclove/feature/setting/presentation/view/setting_library_view.dart';
 import 'package:musiclove/feature/setting/presentation/view/setting_player_music_view.dart';
 import 'package:musiclove/feature/setting/presentation/view/setting_theme_view.dart';
 import 'package:musiclove/feature/setting/presentation/view/setting_view.dart';
 import 'package:musiclove/feature/home/presentation/view/home_view.dart';
+import 'package:musiclove/feature/home/presentation/view/all_songs_view.dart';
 import 'package:musiclove/feature/play_music/presentation/view/play_music_view.dart';
 
-final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'root',
+);
 
-final GlobalKey<NavigatorState> homeNavigatorKey =
-GlobalKey<NavigatorState>(debugLabel: 'home');
+final GlobalKey<NavigatorState> homeNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'home',
+);
 
 final GlobalKey<NavigatorState> playlistNavigatorKey =
-GlobalKey<NavigatorState>(debugLabel: 'playlist');
+    GlobalKey<NavigatorState>(debugLabel: 'playlist');
 
-final GlobalKey<NavigatorState> settingNavigatorKey =
-GlobalKey<NavigatorState>(debugLabel: 'setting');
+final GlobalKey<NavigatorState> settingNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'setting',
+);
 
 class AppRoutes {
-
   ///////////////////////////////
   ////   Route names
   ///////////////////////////////
@@ -32,6 +37,8 @@ class AppRoutes {
   static const String home = '/home';
   static const String playList = '/playList';
   static const String playMusic = '/playMusic';
+  static const String playlistSongPicker = '/playlistSongPicker';
+  static const String allSongs = '/allSongs';
   static const String setting = '/setting';
   static const String settingTheme = '/settingTheme';
   static const String settingBluetooth = '/settingBluetooth';
@@ -47,9 +54,7 @@ class AppRoutes {
     routes: [
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
-          return MainShellView(
-            navigationShell: navigationShell,
-          );
+          return MainShellView(navigationShell: navigationShell);
         },
         branches: [
           StatefulShellBranch(
@@ -58,9 +63,7 @@ class AppRoutes {
               GoRoute(
                 path: home,
                 pageBuilder: (context, state) {
-                  return const CupertinoPage(
-                    child: HomeView(),
-                  );
+                  return const CupertinoPage(child: HomeView());
                 },
               ),
             ],
@@ -72,9 +75,7 @@ class AppRoutes {
               GoRoute(
                 path: playList,
                 pageBuilder: (context, state) {
-                  return const CupertinoPage(
-                    child: PlaylistView(),
-                  );
+                  return const CupertinoPage(child: PlaylistView());
                 },
               ),
             ],
@@ -86,9 +87,7 @@ class AppRoutes {
               GoRoute(
                 path: setting,
                 pageBuilder: (context, state) {
-                  return const CupertinoPage(
-                    child: SettingView(),
-                  );
+                  return const CupertinoPage(child: SettingView());
                 },
               ),
             ],
@@ -96,33 +95,54 @@ class AppRoutes {
         ],
       ),
 
-
       GoRoute(
         path: settingMusicPlayer,
-        pageBuilder: (context, state) => const CupertinoPage(child: SettingPlayerMusicView()),
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: SettingPlayerMusicView()),
       ),
 
       GoRoute(
         path: settingTheme,
-        pageBuilder: (context, state) => const CupertinoPage(child: SettingThemeView()),
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: SettingThemeView()),
       ),
 
       GoRoute(
         path: settingBluetooth,
-        pageBuilder: (context, state) => const CupertinoPage(child: SettingHeadphoneBluetoothView()),
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: SettingHeadphoneBluetoothView()),
       ),
 
       GoRoute(
         path: settingLibrary,
-        pageBuilder: (context, state) => const CupertinoPage(child: SettingLibraryView()),
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: SettingLibraryView()),
       ),
 
       GoRoute(
         path: '$playList/:id',
         pageBuilder: (context, state) {
           final id = state.pathParameters['id']!;
+          return CupertinoPage(child: PlaylistDetailView(playlistId: id));
+        },
+      ),
+
+      GoRoute(
+        path: allSongs,
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: AllSongsView()),
+      ),
+
+      GoRoute(
+        path: '$playlistSongPicker/:playlistId',
+        pageBuilder: (context, state) {
+          final playlistId = state.pathParameters['playlistId']!;
+          final isMultiple = state.uri.queryParameters['multiple'] == 'true';
           return CupertinoPage(
-            child: PlaylistDetailView(playlistId: id),
+            child: PlaylistSongPickerView(
+              playlistId: playlistId,
+              isMultiple: isMultiple,
+            ),
           );
         },
       ),
@@ -134,18 +154,18 @@ class AppRoutes {
           final playlistId = state.uri.queryParameters['playlistId'];
 
           return CupertinoPage(
-            child: PlayMusicView(
-              songId: songId,
-              playlistId: playlistId,
-            ),
+            child: PlayMusicView(songId: songId, playlistId: playlistId),
           );
         },
       ),
-
     ],
   );
 
   static String playlistDetail(String id) => '$playList/$id';
+  static String addSongsToPlaylist(String id, {required bool multiple}) => Uri(
+    path: '$playlistSongPicker/$id',
+    queryParameters: {'multiple': '$multiple'},
+  ).toString();
 
   // Widget hiển thị khi sai Route
   static Widget _errorRoute(GoRouterState state) {
@@ -159,7 +179,6 @@ class AppRoutes {
       ),
     );
   }
-
 
   AppRoutes._();
 }

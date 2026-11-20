@@ -1,6 +1,8 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import 'core/constant/app_config.dart';
 import 'core/constant/routes.dart';
 import 'core/constant/theme.dart';
 import 'feature/setting/domain/repository/setting_repository.dart';
@@ -10,32 +12,34 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Box settingsBox = Hive.box('settings');
+    final Box settingsBox = Hive.box(AppConfig.boxSettings);
 
     return ValueListenableBuilder<Box>(
       valueListenable: settingsBox.listenable(
-        keys: const [
-          SettingKeys.themeMode,
-          SettingKeys.themeStyle,
-        ],
+        keys: const [SettingKeys.themeMode, SettingKeys.themeStyle],
       ),
       builder: (context, box, _) {
-        final String themeModeValue = box.get(
-          SettingKeys.themeMode,
-          defaultValue: 'system',
-        ) as String;
+        final String themeModeValue =
+            box.get(SettingKeys.themeMode, defaultValue: 'system') as String;
 
-        final String themeStyleValue = box.get(
-          SettingKeys.themeStyle,
-          defaultValue: AppThemePreset.musicLove.value,
-        ) as String;
+        final String themeStyleValue =
+            box.get(
+                  SettingKeys.themeStyle,
+                  defaultValue: AppThemePreset.musicLove.value,
+                )
+                as String;
 
-        final AppThemePreset preset = AppTheme.presetFromString(themeStyleValue);
+        final AppThemePreset preset = AppTheme.presetFromString(
+          themeStyleValue,
+        );
 
         return MaterialApp.router(
           debugShowCheckedModeBanner: false,
           routerConfig: AppRoutes.router,
-          title: 'Music App',
+          title: AppConfig.appName,
+          locale: context.locale,
+          supportedLocales: context.supportedLocales,
+          localizationsDelegates: context.localizationDelegates,
           themeMode: AppTheme.themeModeFromString(themeModeValue),
           theme: AppTheme.themeData(
             preset: preset,

@@ -6,8 +6,5 @@ abstract class BaseState {
 
   const BaseState({this.status = BaseStatus.initial, this.errorMessage = ''});
 
-  BaseState copyWith({
-    BaseStatus? status,
-    String? errorMessage,
-  });
+  BaseState copyWith({BaseStatus? status, String? errorMessage});
 }

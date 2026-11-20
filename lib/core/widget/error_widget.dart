@@ -9,7 +9,13 @@ class CustomErrorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: const EdgeInsets.all(50),
-        child: Center(child: Text(title,style: AppTextStyle.textBodyTile(color: AppColor.primaryTextColor),),));
+      padding: const EdgeInsets.all(50),
+      child: Center(
+        child: Text(
+          title,
+          style: AppTextStyle.textBodyTile(color: AppColor.primaryTextColor),
+        ),
+      ),
+    );
   }
 }

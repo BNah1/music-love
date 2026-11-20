@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/constant/routes.dart';
 import '../../../../../core/constant/theme.dart';
 import '../../../../../core/provider/audio_handler_provider.dart';
+import '../../../../../shared/widget/song_artwork_widget.dart';
 
 class MiniPlayerOverlay extends ConsumerWidget {
   const MiniPlayerOverlay({super.key});
@@ -60,11 +61,20 @@ class MiniPlayerOverlay extends ConsumerWidget {
                   ),
                   child: Row(
                     children: [
-                      CircleAvatar(
-                        backgroundColor: appTheme.softAccentColor.withOpacity(0.35),
-                        child: Icon(
-                          Icons.music_note_rounded,
-                          color: appTheme.accentColor,
+                      SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: SongArtworkWidget(
+                          artworkPath: item.artUri?.toFilePath(),
+                          borderRadius: BorderRadius.circular(20),
+                          fallback: CircleAvatar(
+                            backgroundColor: appTheme.softAccentColor
+                                .withOpacity(0.35),
+                            child: Icon(
+                              Icons.music_note_rounded,
+                              color: appTheme.accentColor,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -93,7 +103,9 @@ class MiniPlayerOverlay extends ConsumerWidget {
                       ),
                       IconButton(
                         onPressed: () {
-                          isPlaying ? audioHandler.pause() : audioHandler.play();
+                          isPlaying
+                              ? audioHandler.pause()
+                              : audioHandler.play();
                         },
                         icon: Icon(
                           isPlaying

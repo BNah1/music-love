@@ -10,8 +10,7 @@ class AppTab {
   //   Container(color: Colors.orangeAccent),
   // ];
 
-  static List<Widget> listTabView = [
-  ];
+  static List<Widget> listTabView = [];
 
   static TabBarView tabView(TabController tabController) {
     return TabBarView(controller: tabController, children: listTabView);

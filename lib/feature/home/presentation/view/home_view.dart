@@ -1,8 +1,11 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:musiclove/core/constant/app_enum.dart';
+import 'package:musiclove/core/constant/app_string.dart';
 import 'package:musiclove/core/constant/routes.dart';
+import 'package:musiclove/core/constant/song_sort_option.dart';
 import 'package:musiclove/core/constant/theme.dart';
 import 'package:musiclove/feature/home/presentation/provider/home_provider.dart';
 import 'package:musiclove/feature/home/presentation/state/home_state.dart';
@@ -13,6 +16,7 @@ import 'package:musiclove/shared/entity/playlist_entity.dart';
 import 'package:musiclove/shared/entity/mp3_file_entity.dart';
 import 'package:musiclove/shared/widget/music_column_tile_widget.dart';
 import 'package:musiclove/shared/widget/music_row_tile_widget.dart';
+import 'package:musiclove/shared/widget/song_sort_menu.dart';
 
 class HomeView extends ConsumerWidget {
   const HomeView({super.key});
@@ -37,6 +41,7 @@ class HomeView extends ConsumerWidget {
             onSearchChanged: notifier.searchSongs,
             onClearSearch: notifier.clearSearch,
             onSearchPressed: notifier.pressSearch,
+            onSortChanged: notifier.changeSort,
             playlists: playlists,
           ),
         ),
@@ -52,6 +57,7 @@ class HomeView extends ConsumerWidget {
     required VoidCallback onRetryPressed,
     required ValueChanged<String> onSearchChanged,
     required VoidCallback onClearSearch,
+    required ValueChanged<SongSortOption> onSortChanged,
     required List<PlaylistEntity> playlists,
   }) {
     if (state.status == BaseStatus.loading && state.songs.isEmpty) {
@@ -92,22 +98,65 @@ class HomeView extends ConsumerWidget {
           const SizedBox(height: 25),
 
           if (state.isSearching) ...[
-            _SectionTitle(title: 'Kết quả tìm kiếm (${songsToShow.length})'),
+            _SectionTitle(
+              title: context.tr(
+                AppString.homeSearchResults,
+                namedArgs: {'count': '${songsToShow.length}'},
+              ),
+            ),
             const SizedBox(height: 10),
             _SearchResultList(songs: songsToShow),
           ] else ...[
             if (playlists.isNotEmpty) ...[
-              const _SectionTitle(title: 'Playlist'),
+              _SectionTitle(title: context.tr(AppString.homePlaylists)),
               const SizedBox(height: 15),
               _PlaylistList(playlists: playlists),
               const SizedBox(height: 30),
             ],
-            const _SectionTitle(title: 'Gần đây'),
+            _SectionTitle(title: context.tr(AppString.homeRecent)),
             const SizedBox(height: 15),
             _RecentList(songs: state.songs),
             const SizedBox(height: 30),
-            const _SectionTitle(title: 'Tất cả bài hát'),
-            _SuggestionList(songs: state.songs),
+            Row(
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: _SectionTitle(
+                          title: context.tr(AppString.homeAllSongs),
+                        ),
+                      ),
+                      SongSortMenu(value: state.sortOption, onChanged: onSortChanged),
+                    ],
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: () => context.push(AppRoutes.allSongs),
+                    // label: Text(context.tr(AppString.homeSeeAll)),
+                    label: Text(''),
+                    icon: const Icon(Icons.arrow_forward_ios,size: 25,),
+                    iconAlignment: IconAlignment.end,
+                  ),
+                ),
+              ],
+            ),
+
+            _SuggestionList(
+              songs: state.sortOption.sort(state.songs).take(10).toList(),
+            ),
+
+            Align(
+              alignment: Alignment.center,
+              child: TextButton.icon(
+                onPressed: () => context.push(AppRoutes.allSongs),
+                label: Text(context.tr(AppString.homeSeeAll)),
+                icon: const Icon(Icons.chevron_right_rounded),
+                iconAlignment: IconAlignment.end,
+              ),
+            ),
           ],
 
           const SizedBox(height: 30),
@@ -136,7 +185,7 @@ class HomeView extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              message.isEmpty ? 'Có lỗi xảy ra' : message,
+              message.isEmpty ? context.tr(AppString.homeError) : message,
               textAlign: TextAlign.center,
               style: TextStyle(color: appTheme.textColor, fontSize: 15),
             ),
@@ -144,7 +193,7 @@ class HomeView extends ConsumerWidget {
             ElevatedButton.icon(
               onPressed: onRetryPressed,
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Thử lại'),
+              label: Text(context.tr(AppString.homeRetry)),
             ),
           ],
         ),
@@ -197,7 +246,10 @@ class _PlaylistList extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '${playlist.songIds.length} bài hát',
+                        context.tr(
+                          AppString.playlistSongsCount,
+                          namedArgs: {'count': '${playlist.songIds.length}'},
+                        ),
                         style: TextStyle(color: appTheme.subtitleColor),
                       ),
                     ],
@@ -242,7 +294,7 @@ class _RecentList extends StatelessWidget {
     return SizedBox(
       height: 150,
       child: songs.isEmpty
-          ? const Center(child: Text('Trống'))
+          ? Center(child: Text(context.tr(AppString.homeEmpty)))
           : ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: songs.length > 5 ? 5 : songs.length,
@@ -262,9 +314,9 @@ class _SuggestionList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (songs.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.only(top: 50),
-        child: Center(child: Text('Hãy bấm scan để tìm nhạc')),
+      return Padding(
+        padding: const EdgeInsets.only(top: 50),
+        child: Center(child: Text(context.tr(AppString.homeScanToFind))),
       );
     }
 
@@ -287,9 +339,9 @@ class _SearchResultList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (songs.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.only(top: 40),
-        child: Center(child: Text('Không tìm thấy bài hát phù hợp')),
+      return Padding(
+        padding: const EdgeInsets.only(top: 40),
+        child: Center(child: Text(context.tr(AppString.homeNoMatchingSongs))),
       );
     }
 

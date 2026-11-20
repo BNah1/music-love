@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:musiclove/core/constant/theme.dart';
 
 class BottomOptionTile extends StatelessWidget {
-  const BottomOptionTile({super.key,
+  const BottomOptionTile({
+    super.key,
     required this.title,
     required this.selected,
     required this.onTap,
@@ -20,10 +21,7 @@ class BottomOptionTile extends StatelessWidget {
       onTap: onTap,
       title: Text(title),
       trailing: selected
-          ? Icon(
-        Icons.check_circle_rounded,
-        color: appTheme.accentColor,
-      )
+          ? Icon(Icons.check_circle_rounded, color: appTheme.accentColor)
           : null,
     );
   }

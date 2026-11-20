@@ -13,9 +13,7 @@ abstract class SongLocalDataSource {
 class SongLocalDataSourceImpl implements SongLocalDataSource {
   final Box box;
 
-  SongLocalDataSourceImpl({
-    required this.box,
-  });
+  SongLocalDataSourceImpl({required this.box});
 
   @override
   Future<void> upsertSongs(List<Mp3FileEntity> songs) async {
@@ -27,13 +25,9 @@ class SongLocalDataSourceImpl implements SongLocalDataSource {
 
   @override
   Future<List<Mp3FileEntity>> getAllSongs() async {
-    return box.values
-        .map((item) {
-      return Mp3FileModel.fromMap(
-        Map<String, dynamic>.from(item),
-      );
-    })
-        .toList();
+    return box.values.map((item) {
+      return Mp3FileModel.fromMap(Map<String, dynamic>.from(item));
+    }).toList();
   }
 
   @override
@@ -42,8 +36,6 @@ class SongLocalDataSourceImpl implements SongLocalDataSource {
 
     if (data == null) return null;
 
-    return Mp3FileModel.fromMap(
-      Map<String, dynamic>.from(data),
-    );
+    return Mp3FileModel.fromMap(Map<String, dynamic>.from(data));
   }
 }

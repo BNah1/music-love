@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class RoundButton extends StatelessWidget {
   const RoundButton({
     super.key,
@@ -25,9 +24,7 @@ class RoundButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: onPressed == null ? Colors.transparent : color,
           borderRadius: BorderRadius.circular(25),
-          border: Border.all(
-            color: Colors.blue,
-          ),
+          border: Border.all(color: Colors.blue),
         ),
         child: Center(
           child: Text(

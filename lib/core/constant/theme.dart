@@ -2,14 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'app_color.dart';
 
-enum AppThemePreset {
-  musicLove,
-  gradient,
-  snow,
-  sunset,
-  ocean,
-  neon,
-}
+enum AppThemePreset { musicLove, gradient, snow, sunset, ocean, neon }
 
 extension AppThemePresetX on AppThemePreset {
   String get value {
@@ -25,7 +18,7 @@ extension AppThemePresetX on AppThemePreset {
       case AppThemePreset.neon:
         return 'neon';
       case AppThemePreset.musicLove:
-      return 'musicLove';
+        return 'musicLove';
     }
   }
 
@@ -42,7 +35,7 @@ extension AppThemePresetX on AppThemePreset {
       case AppThemePreset.neon:
         return 'Neon';
       case AppThemePreset.musicLove:
-      return 'Music Love';
+        return 'Music Love';
     }
   }
 
@@ -59,7 +52,7 @@ extension AppThemePresetX on AppThemePreset {
       case AppThemePreset.neon:
         return 'Đậm, nổi bật, cyber vibe';
       case AppThemePreset.musicLove:
-      return 'Hồng nhẹ mặc định của app';
+        return 'Hồng nhẹ mặc định của app';
     }
   }
 
@@ -76,7 +69,7 @@ extension AppThemePresetX on AppThemePreset {
       case AppThemePreset.neon:
         return Icons.bolt_rounded;
       case AppThemePreset.musicLove:
-      return Icons.favorite_rounded;
+        return Icons.favorite_rounded;
     }
   }
 
@@ -93,7 +86,7 @@ extension AppThemePresetX on AppThemePreset {
       case AppThemePreset.neon:
         return const [Color(0xFFFF00CC), Color(0xFF00F5FF)];
       case AppThemePreset.musicLove:
-      return const [Color(0xFFFFDEE9), Color(0xFFB5FFFC)];
+        return const [Color(0xFFFFDEE9), Color(0xFFB5FFFC)];
     }
   }
 }
@@ -173,8 +166,12 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
 
     return AppThemeExtension(
       preset: t < 0.5 ? preset : other.preset,
-      backgroundGradient: t < 0.5 ? backgroundGradient : other.backgroundGradient,
-      navIndicatorGradient: t < 0.5 ? navIndicatorGradient : other.navIndicatorGradient,
+      backgroundGradient: t < 0.5
+          ? backgroundGradient
+          : other.backgroundGradient,
+      navIndicatorGradient: t < 0.5
+          ? navIndicatorGradient
+          : other.navIndicatorGradient,
       musicCardGradient: t < 0.5 ? musicCardGradient : other.musicCardGradient,
       pageBackground: Color.lerp(pageBackground, other.pageBackground, t)!,
       cardBackground: Color.lerp(cardBackground, other.cardBackground, t)!,
@@ -183,8 +180,16 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
       softAccentColor: Color.lerp(softAccentColor, other.softAccentColor, t)!,
       textColor: Color.lerp(textColor, other.textColor, t)!,
       subtitleColor: Color.lerp(subtitleColor, other.subtitleColor, t)!,
-      selectedIconColor: Color.lerp(selectedIconColor, other.selectedIconColor, t)!,
-      unselectedIconColor: Color.lerp(unselectedIconColor, other.unselectedIconColor, t)!,
+      selectedIconColor: Color.lerp(
+        selectedIconColor,
+        other.selectedIconColor,
+        t,
+      )!,
+      unselectedIconColor: Color.lerp(
+        unselectedIconColor,
+        other.unselectedIconColor,
+        t,
+      )!,
       shadowColor: Color.lerp(shadowColor, other.shadowColor, t)!,
     );
   }
@@ -244,7 +249,9 @@ class AppTheme {
       brightness: brightness,
     );
 
-    final baseTextTheme = isDark ? ThemeData.dark().textTheme : ThemeData.light().textTheme;
+    final baseTextTheme = isDark
+        ? ThemeData.dark().textTheme
+        : ThemeData.light().textTheme;
     final colorScheme = ColorScheme.fromSeed(
       seedColor: appTheme.accentColor,
       brightness: brightness,
@@ -269,9 +276,7 @@ class AppTheme {
       shadowColor: appTheme.shadowColor,
       unselectedWidgetColor: appTheme.unselectedIconColor,
       fontFamily: 'BeVietnamPro',
-      extensions: <ThemeExtension<dynamic>>[
-        appTheme,
-      ],
+      extensions: <ThemeExtension<dynamic>>[appTheme],
       textTheme: baseTextTheme.apply(
         fontFamily: 'BeVietnamPro',
         bodyColor: appTheme.textColor,
@@ -312,11 +317,15 @@ class AppTheme {
         alignLabelWithHint: true,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: isDark ? Colors.white12 : Colors.black12),
+          borderSide: BorderSide(
+            color: isDark ? Colors.white12 : Colors.black12,
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: isDark ? Colors.white12 : Colors.black12),
+          borderSide: BorderSide(
+            color: isDark ? Colors.white12 : Colors.black12,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
@@ -332,7 +341,9 @@ class AppTheme {
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: isDark ? Colors.white10 : Colors.black12),
+          borderSide: BorderSide(
+            color: isDark ? Colors.white10 : Colors.black12,
+          ),
         ),
         iconColor: appTheme.accentColor,
         prefixIconColor: appTheme.accentColor,
@@ -342,22 +353,24 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ButtonStyle(
-          backgroundColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+          backgroundColor: WidgetStateProperty.resolveWith<Color>((
+            Set<WidgetState> states,
+          ) {
             if (states.contains(WidgetState.disabled)) {
               return isDark ? Colors.white12 : Colors.black12;
             }
             return appTheme.accentColor;
           }),
-          foregroundColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+          foregroundColor: WidgetStateProperty.resolveWith<Color>((
+            Set<WidgetState> states,
+          ) {
             if (states.contains(WidgetState.disabled)) {
               return isDark ? Colors.white38 : Colors.black38;
             }
             return appTheme.selectedIconColor;
           }),
           shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           ),
         ),
       ),
@@ -365,21 +378,30 @@ class AppTheme {
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(Colors.transparent),
           foregroundColor: WidgetStateProperty.all(appTheme.accentColor),
-          overlayColor: WidgetStateProperty.all(appTheme.softAccentColor.withOpacity(0.12)),
+          overlayColor: WidgetStateProperty.all(
+            appTheme.softAccentColor.withOpacity(0.12),
+          ),
           shadowColor: WidgetStateProperty.all(Colors.transparent),
           elevation: WidgetStateProperty.all(0),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: ButtonStyle(
-          side: WidgetStateProperty.resolveWith<BorderSide>((Set<WidgetState> states) {
+          side: WidgetStateProperty.resolveWith<BorderSide>((
+            Set<WidgetState> states,
+          ) {
             if (states.contains(WidgetState.disabled)) {
-              return BorderSide(color: isDark ? Colors.white30 : Colors.black26, width: 2);
+              return BorderSide(
+                color: isDark ? Colors.white30 : Colors.black26,
+                width: 2,
+              );
             }
             return BorderSide(color: appTheme.accentColor, width: 2);
           }),
           foregroundColor: WidgetStateProperty.all<Color>(appTheme.accentColor),
-          backgroundColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+          backgroundColor: WidgetStateProperty.resolveWith<Color>((
+            Set<WidgetState> states,
+          ) {
             if (states.contains(WidgetState.disabled)) {
               return isDark ? Colors.white10 : Colors.black12;
             }
@@ -389,9 +411,7 @@ class AppTheme {
             return appTheme.cardBackground;
           }),
           shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           ),
         ),
       ),
@@ -401,20 +421,24 @@ class AppTheme {
           foregroundColor: WidgetStateProperty.all(appTheme.accentColor),
           elevation: WidgetStateProperty.all(0),
           shape: WidgetStateProperty.all(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
           alignment: Alignment.center,
         ),
       ),
       switchTheme: SwitchThemeData(
-        thumbColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
-          if (states.contains(WidgetState.selected)) return appTheme.accentColor;
+        thumbColor: WidgetStateProperty.resolveWith<Color>((
+          Set<WidgetState> states,
+        ) {
+          if (states.contains(WidgetState.selected))
+            return appTheme.accentColor;
           return isDark ? Colors.white70 : Colors.white;
         }),
-        trackColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
-          if (states.contains(WidgetState.selected)) return appTheme.accentColor.withOpacity(0.35);
+        trackColor: WidgetStateProperty.resolveWith<Color>((
+          Set<WidgetState> states,
+        ) {
+          if (states.contains(WidgetState.selected))
+            return appTheme.accentColor.withOpacity(0.35);
           return isDark ? Colors.white24 : Colors.black12;
         }),
       ),
@@ -443,10 +467,7 @@ class AppTheme {
         indicatorSize: TabBarIndicatorSize.tab,
         indicator: BoxDecoration(
           border: Border(
-            bottom: BorderSide(
-              color: appTheme.accentColor,
-              width: 4,
-            ),
+            bottom: BorderSide(color: appTheme.accentColor, width: 4),
           ),
         ),
       ),
@@ -480,16 +501,26 @@ class AppTheme {
           musicCardGradient: const LinearGradient(
             colors: [Color(0xFFE0C3FC), Color(0xFF8EC5FC)],
           ),
-          pageBackground: isDark ? const Color(0xFF111827) : const Color(0xFFF6F2FF),
-          cardBackground: isDark ? const Color(0xFF1F2937) : Colors.white.withOpacity(0.92),
-          navBackground: isDark ? const Color(0xDD1F2937) : Colors.white.withOpacity(0.82),
+          pageBackground: isDark
+              ? const Color(0xFF111827)
+              : const Color(0xFFF6F2FF),
+          cardBackground: isDark
+              ? const Color(0xFF1F2937)
+              : Colors.white.withOpacity(0.92),
+          navBackground: isDark
+              ? const Color(0xDD1F2937)
+              : Colors.white.withOpacity(0.82),
           accentColor: const Color(0xFF7C3AED),
           softAccentColor: const Color(0xFF8EC5FC),
           textColor: isDark ? Colors.white : const Color(0xFF151827),
           subtitleColor: isDark ? Colors.white70 : const Color(0xFF6B7280),
           selectedIconColor: Colors.white,
-          unselectedIconColor: isDark ? Colors.white60 : const Color(0xFF64748B),
-          shadowColor: const Color(0xFF8EC5FC).withOpacity(isDark ? 0.22 : 0.28),
+          unselectedIconColor: isDark
+              ? Colors.white60
+              : const Color(0xFF64748B),
+          shadowColor: const Color(
+            0xFF8EC5FC,
+          ).withOpacity(isDark ? 0.22 : 0.28),
         );
       case AppThemePreset.snow:
         return AppThemeExtension(
@@ -507,15 +538,23 @@ class AppTheme {
           musicCardGradient: const LinearGradient(
             colors: [Color(0xFFFFFFFF), Color(0xFFDFF6FF)],
           ),
-          pageBackground: isDark ? const Color(0xFF0F172A) : const Color(0xFFF4FBFF),
-          cardBackground: isDark ? const Color(0xFF1E293B) : Colors.white.withOpacity(0.96),
-          navBackground: isDark ? const Color(0xE61E293B) : Colors.white.withOpacity(0.9),
+          pageBackground: isDark
+              ? const Color(0xFF0F172A)
+              : const Color(0xFFF4FBFF),
+          cardBackground: isDark
+              ? const Color(0xFF1E293B)
+              : Colors.white.withOpacity(0.96),
+          navBackground: isDark
+              ? const Color(0xE61E293B)
+              : Colors.white.withOpacity(0.9),
           accentColor: const Color(0xFF0284C7),
           softAccentColor: const Color(0xFFBAE6FD),
           textColor: isDark ? Colors.white : const Color(0xFF0F172A),
           subtitleColor: isDark ? Colors.white70 : const Color(0xFF64748B),
           selectedIconColor: Colors.white,
-          unselectedIconColor: isDark ? Colors.white60 : const Color(0xFF64748B),
+          unselectedIconColor: isDark
+              ? Colors.white60
+              : const Color(0xFF64748B),
           shadowColor: const Color(0xFF0284C7).withOpacity(isDark ? 0.2 : 0.14),
         );
       case AppThemePreset.sunset:
@@ -534,16 +573,26 @@ class AppTheme {
           musicCardGradient: const LinearGradient(
             colors: [Color(0xFFFF9A9E), Color(0xFFFAD0C4)],
           ),
-          pageBackground: isDark ? const Color(0xFF1F1415) : const Color(0xFFFFF4EF),
-          cardBackground: isDark ? const Color(0xFF2A1B1C) : Colors.white.withOpacity(0.94),
-          navBackground: isDark ? const Color(0xE62A1B1C) : Colors.white.withOpacity(0.84),
+          pageBackground: isDark
+              ? const Color(0xFF1F1415)
+              : const Color(0xFFFFF4EF),
+          cardBackground: isDark
+              ? const Color(0xFF2A1B1C)
+              : Colors.white.withOpacity(0.94),
+          navBackground: isDark
+              ? const Color(0xE62A1B1C)
+              : Colors.white.withOpacity(0.84),
           accentColor: const Color(0xFFF97316),
           softAccentColor: const Color(0xFFFFB199),
           textColor: isDark ? Colors.white : const Color(0xFF24130F),
           subtitleColor: isDark ? Colors.white70 : const Color(0xFF7C4A3A),
           selectedIconColor: Colors.white,
-          unselectedIconColor: isDark ? Colors.white60 : const Color(0xFF9A6B5B),
-          shadowColor: const Color(0xFFF97316).withOpacity(isDark ? 0.22 : 0.18),
+          unselectedIconColor: isDark
+              ? Colors.white60
+              : const Color(0xFF9A6B5B),
+          shadowColor: const Color(
+            0xFFF97316,
+          ).withOpacity(isDark ? 0.22 : 0.18),
         );
       case AppThemePreset.ocean:
         return AppThemeExtension(
@@ -561,16 +610,26 @@ class AppTheme {
           musicCardGradient: const LinearGradient(
             colors: [Color(0xFF43E97B), Color(0xFF38F9D7)],
           ),
-          pageBackground: isDark ? const Color(0xFF061F2B) : const Color(0xFFF0FFFB),
-          cardBackground: isDark ? const Color(0xFF102A36) : Colors.white.withOpacity(0.94),
-          navBackground: isDark ? const Color(0xE6102A36) : Colors.white.withOpacity(0.84),
+          pageBackground: isDark
+              ? const Color(0xFF061F2B)
+              : const Color(0xFFF0FFFB),
+          cardBackground: isDark
+              ? const Color(0xFF102A36)
+              : Colors.white.withOpacity(0.94),
+          navBackground: isDark
+              ? const Color(0xE6102A36)
+              : Colors.white.withOpacity(0.84),
           accentColor: const Color(0xFF0891B2),
           softAccentColor: const Color(0xFF5EEAD4),
           textColor: isDark ? Colors.white : const Color(0xFF0F172A),
           subtitleColor: isDark ? Colors.white70 : const Color(0xFF52717A),
           selectedIconColor: Colors.white,
-          unselectedIconColor: isDark ? Colors.white60 : const Color(0xFF52717A),
-          shadowColor: const Color(0xFF0891B2).withOpacity(isDark ? 0.22 : 0.17),
+          unselectedIconColor: isDark
+              ? Colors.white60
+              : const Color(0xFF52717A),
+          shadowColor: const Color(
+            0xFF0891B2,
+          ).withOpacity(isDark ? 0.22 : 0.17),
         );
       case AppThemePreset.neon:
         return AppThemeExtension(
@@ -588,19 +647,29 @@ class AppTheme {
           musicCardGradient: const LinearGradient(
             colors: [Color(0xFFFF00CC), Color(0xFF00F5FF)],
           ),
-          pageBackground: isDark ? const Color(0xFF09090B) : const Color(0xFFFFF6FE),
-          cardBackground: isDark ? const Color(0xFF18181B) : Colors.white.withOpacity(0.94),
-          navBackground: isDark ? const Color(0xE618181B) : Colors.white.withOpacity(0.84),
+          pageBackground: isDark
+              ? const Color(0xFF09090B)
+              : const Color(0xFFFFF6FE),
+          cardBackground: isDark
+              ? const Color(0xFF18181B)
+              : Colors.white.withOpacity(0.94),
+          navBackground: isDark
+              ? const Color(0xE618181B)
+              : Colors.white.withOpacity(0.84),
           accentColor: const Color(0xFFDB2777),
           softAccentColor: const Color(0xFF22D3EE),
           textColor: isDark ? Colors.white : const Color(0xFF18181B),
           subtitleColor: isDark ? Colors.white70 : const Color(0xFF71717A),
           selectedIconColor: Colors.white,
-          unselectedIconColor: isDark ? Colors.white60 : const Color(0xFF71717A),
-          shadowColor: const Color(0xFFFF00CC).withOpacity(isDark ? 0.26 : 0.18),
+          unselectedIconColor: isDark
+              ? Colors.white60
+              : const Color(0xFF71717A),
+          shadowColor: const Color(
+            0xFFFF00CC,
+          ).withOpacity(isDark ? 0.26 : 0.18),
         );
       case AppThemePreset.musicLove:
-      return AppThemeExtension(
+        return AppThemeExtension(
           preset: preset,
           backgroundGradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -615,15 +684,21 @@ class AppTheme {
           musicCardGradient: const LinearGradient(
             colors: [Color(0xFFFFDEE9), Color(0xFFB5FFFC)],
           ),
-          pageBackground: isDark ? const Color(0xFF161116) : const Color(0xFFF7F7FA),
+          pageBackground: isDark
+              ? const Color(0xFF161116)
+              : const Color(0xFFF7F7FA),
           cardBackground: isDark ? const Color(0xFF241D25) : Colors.white,
-          navBackground: isDark ? const Color(0xE6241D25) : Colors.white.withOpacity(0.82),
+          navBackground: isDark
+              ? const Color(0xE6241D25)
+              : Colors.white.withOpacity(0.82),
           accentColor: Colors.pinkAccent,
           softAccentColor: const Color(0xFFFFDEE9),
           textColor: isDark ? Colors.white : const Color(0xFF111827),
           subtitleColor: isDark ? Colors.white70 : const Color(0xFF7A7A7A),
           selectedIconColor: Colors.white,
-          unselectedIconColor: isDark ? Colors.white60 : Colors.blueGrey.withOpacity(0.62),
+          unselectedIconColor: isDark
+              ? Colors.white60
+              : Colors.blueGrey.withOpacity(0.62),
           shadowColor: Colors.pink.withOpacity(isDark ? 0.22 : 0.08),
         );
     }

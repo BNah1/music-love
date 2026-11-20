@@ -1,16 +1,16 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:musiclove/core/constant/app_string.dart';
 import 'package:musiclove/core/constant/routes.dart';
 import 'package:musiclove/core/constant/theme.dart';
 import 'package:musiclove/feature/playlist/presentation/provider/playlist_provider.dart';
 import 'package:musiclove/feature/playlist/presentation/view/widget/edit_playlist_widget.dart';
+import 'package:musiclove/feature/playlist/presentation/view/widget/playlist_name_dialog.dart';
 
 class PlaylistView extends ConsumerWidget {
   const PlaylistView({super.key});
-
-
-
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -19,47 +19,18 @@ class PlaylistView extends ConsumerWidget {
     final notifier = ref.read(playlistProvider.notifier);
     final playlists = state.playlists;
 
-
     Future<void> createPlaylist() async {
-      final controller = TextEditingController();
-
-      await showDialog(
+      final name = await showPlaylistNameDialog(
         context: context,
-        builder: (toastContext) => AlertDialog(
-          title: const Text('Tạo playlist'),
-          content: TextField(
-            controller: controller,
-            decoration: const InputDecoration(
-              hintText: 'Tên playlist',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(toastContext),
-              child: const Text('Hủy'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final name = controller.text.trim();
-                if (name.isEmpty) return;
-
-                await notifier.createPlaylist(name);
-
-                if (toastContext.mounted) {
-                  Navigator.pop(toastContext);
-                }
-              },
-              child: const Text('Tạo'),
-            ),
-          ],
-        ),
+        title: context.tr(AppString.playlistCreate),
+        submitLabel: context.tr(AppString.commonCreate),
       );
+      if (name == null || name.isEmpty) return;
+      await notifier.createPlaylist(name);
     }
 
     return Container(
-      decoration: BoxDecoration(
-        gradient: appTheme.backgroundGradient,
-      ),
+      decoration: BoxDecoration(gradient: appTheme.backgroundGradient),
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
@@ -73,12 +44,12 @@ class PlaylistView extends ConsumerWidget {
               ),
             ),
           ],
-          title: const Text('Playlist'),
+          title: Text(context.tr(AppString.playlistTitle)),
         ),
         body: playlists.isEmpty
             ? Center(
                 child: Text(
-                  'Chưa có playlist',
+                  context.tr(AppString.playlistEmpty),
                   style: TextStyle(color: appTheme.subtitleColor),
                 ),
               )
@@ -101,12 +72,13 @@ class PlaylistView extends ConsumerWidget {
                       ),
                     ),
                     subtitle: Text(
-                      '${p.songIds.length} bài hát',
+                      context.tr(
+                        AppString.playlistSongsCount,
+                        namedArgs: {'count': '${p.songIds.length}'},
+                      ),
                       style: TextStyle(color: appTheme.subtitleColor),
                     ),
-                    trailing: EditPlaylistWidget(
-                      playlist: p,
-                    ),
+                    trailing: EditPlaylistWidget(playlist: p),
                     onTap: () {
                       context.push(AppRoutes.playlistDetail(p.id));
                     },

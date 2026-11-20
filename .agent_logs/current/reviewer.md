@@ -1,8 +1,8 @@
 # Reviewer Assignment
 
-Status: `COMPLETE`  
-Agent/model: `codex`  
-Task: `project_management/tasks/TASK-0001-framework-adoption.md`  
-Last update: `2026-11-02`
+Status: `UNAVAILABLE`
+Agent/model: `unassigned`
+Task: `project_management/tasks/TASK-0004-song-browsing-playlist-ux.md`
+Last update: `2026-11-20`
 
-Review classification: `INDEPENDENT_REVIEW` (separate bounded pass)
+Review classification: `PENDING_INDEPENDENT_REVIEW`; executor self-review cannot satisfy this gate.

@@ -1,7 +1,13 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:musiclove/core/constant/app_string.dart';
+import 'package:musiclove/core/constant/routes.dart';
+import 'package:musiclove/core/widget/app_overlay.dart';
 import 'package:musiclove/feature/playlist/presentation/provider/playlist_provider.dart';
 import 'package:musiclove/shared/entity/playlist_entity.dart';
+import 'package:musiclove/feature/playlist/presentation/view/widget/playlist_name_dialog.dart';
 
 class EditPlaylistWidget extends ConsumerWidget {
   const EditPlaylistWidget({
@@ -24,21 +30,52 @@ class EditPlaylistWidget extends ConsumerWidget {
   }
 
   // Tách logic build UI cho BottomSheet
-  Widget _buildSheetContent(BuildContext sheetContext, BuildContext originalContext, WidgetRef ref) {
+  Widget _buildSheetContent(
+    BuildContext sheetContext,
+    BuildContext originalContext,
+    WidgetRef ref,
+  ) {
     return SafeArea(
       child: Wrap(
         children: [
           ListTile(
+            leading: const Icon(Icons.music_note_rounded),
+            title: Text(sheetContext.tr(AppString.playlistAddSong)),
+            onTap: () {
+              Navigator.of(sheetContext).pop();
+              originalContext.push(
+                AppRoutes.addSongsToPlaylist(playlist.id, multiple: false),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.library_add_rounded),
+            title: Text(sheetContext.tr(AppString.playlistAddMultipleSongs)),
+            onTap: () {
+              Navigator.of(sheetContext).pop();
+              originalContext.push(
+                AppRoutes.addSongsToPlaylist(playlist.id, multiple: true),
+              );
+            },
+          ),
+          const Divider(height: 1),
+          ListTile(
             leading: const Icon(Icons.edit_rounded),
-            title: const Text('Đổi tên'),
+            title: Text(sheetContext.tr(AppString.menuRename)),
             onTap: () {
               Navigator.of(sheetContext).pop();
               _showRenameDialog(originalContext, ref);
             },
           ),
           ListTile(
-            leading: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
-            title: const Text('Xóa', style: TextStyle(color: Colors.redAccent)),
+            leading: const Icon(
+              Icons.delete_outline_rounded,
+              color: Colors.redAccent,
+            ),
+            title: Text(
+              sheetContext.tr(AppString.menuDelete),
+              style: const TextStyle(color: Colors.redAccent),
+            ),
             onTap: () {
               Navigator.of(sheetContext).pop();
               _confirmDelete(originalContext, ref);
@@ -49,82 +86,65 @@ class EditPlaylistWidget extends ConsumerWidget {
     );
   }
 
-  Future<void> _showActionBottomSheet(BuildContext context, WidgetRef ref) async {
-    await showModalBottomSheet(
+  Future<void> _showActionBottomSheet(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    await AppOverlay.showSheet(
       context: context,
-      showDragHandle: true,
-      useRootNavigator: false,
       builder: (sheetContext) => _buildSheetContent(sheetContext, context, ref),
     );
   }
 
   Future<void> _showRenameDialog(BuildContext context, WidgetRef ref) async {
-    final controller = TextEditingController(text: playlist.name);
     final playlistNotifier = ref.read(playlistProvider.notifier);
 
-    final result = await showDialog<String>(
+    final result = await showPlaylistNameDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Đổi tên playlist'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(hintText: 'Tên playlist'),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Hủy')),
-          ElevatedButton(
-            onPressed: () {
-              FocusManager.instance.primaryFocus?.unfocus();
-              Navigator.pop(dialogContext, controller.text);
-            },
-            child: const Text('Lưu'),
-          ),
-        ],
-      ),
+      title: context.tr(AppString.playlistRename),
+      initialValue: playlist.name,
     );
 
-    //  Kiểm tra kết quả trước
-    if (result == null || result.trim().isEmpty) {
-      controller.dispose(); // Dispose sớm nếu người dùng hủy
-      return;
-    }
+    if (result == null || result.trim().isEmpty) return;
 
     final newName = result.trim();
 
-    try {
-      // Thực hiện logic cập nhật
-      await playlistNotifier.renamePlaylist(
-        playlistId: playlist.id,
-        name: newName,
-      );
+    await playlistNotifier.renamePlaylist(
+      playlistId: playlist.id,
+      name: newName,
+    );
 
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đã đổi tên playlist')),
-        );
-        onRenamed?.call();
-      }
-    } finally {
-      // Đảm bảo dispose controller CUỐI CÙNG sau khi mọi tác vụ async và rebuild đã xong
-      controller.dispose();
+    if (context.mounted) {
+      AppOverlay.showToast(context, context.tr(AppString.playlistRenamed));
+      onRenamed?.call();
     }
   }
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
     final playlistNotifier = ref.read(playlistProvider.notifier);
 
-    final isConfirmed = await showDialog<bool>(
+    final isConfirmed = await AppOverlay.showModal<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Xóa playlist'),
-        content: Text('Bạn có chắc muốn xóa playlist "${playlist.name}" không?'),
+        title: Text(dialogContext.tr(AppString.playlistDelete)),
+        content: Text(
+          dialogContext.tr(
+            AppString.playlistConfirmDelete,
+            namedArgs: {'name': playlist.name},
+          ),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Hủy')),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(dialogContext.tr(AppString.commonCancel)),
+          ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Xóa'),
+            child: Text(dialogContext.tr(AppString.commonDelete)),
           ),
         ],
       ),
@@ -135,7 +155,7 @@ class EditPlaylistWidget extends ConsumerWidget {
     await playlistNotifier.deletePlaylist(playlist.id);
 
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã xóa playlist')));
+    AppOverlay.showToast(context, context.tr(AppString.playlistDeleted));
     onDeleted?.call();
   }
 }

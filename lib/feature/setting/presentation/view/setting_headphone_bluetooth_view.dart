@@ -1,4 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:musiclove/core/constant/app_string.dart';
 import 'package:musiclove/feature/setting/domain/repository/setting_repository.dart';
 import 'package:musiclove/feature/setting/presentation/view/widget/setting_card_widget.dart';
 import 'package:musiclove/feature/setting/presentation/view/widget/switch_tile_widget.dart';
@@ -7,10 +9,12 @@ class SettingHeadphoneBluetoothView extends StatefulWidget {
   const SettingHeadphoneBluetoothView({super.key});
 
   @override
-  State<SettingHeadphoneBluetoothView> createState() => _SettingHeadphoneBluetoothViewState();
+  State<SettingHeadphoneBluetoothView> createState() =>
+      _SettingHeadphoneBluetoothViewState();
 }
 
-class _SettingHeadphoneBluetoothViewState extends State<SettingHeadphoneBluetoothView> {
+class _SettingHeadphoneBluetoothViewState
+    extends State<SettingHeadphoneBluetoothView> {
   final SettingRepository _repo = SettingRepository();
   late bool _autoPlayWhenHeadphoneConnected;
   late bool _pauseWhenHeadphoneDisconnected;
@@ -23,7 +27,6 @@ class _SettingHeadphoneBluetoothViewState extends State<SettingHeadphoneBluetoot
   }
 
   void _loadSettings() {
-
     _autoPlayWhenHeadphoneConnected = _repo.getBool(
       SettingKeys.autoPlayWhenHeadphoneConnected,
       defaultValue: false,
@@ -43,19 +46,19 @@ class _SettingHeadphoneBluetoothViewState extends State<SettingHeadphoneBluetoot
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text('Tai nghe - Bluetooth'),),
-        body: _buildHeadphoneBluetoothSection());
+      appBar: AppBar(title: Text(context.tr(AppString.settingsBluetooth))),
+      body: _buildHeadphoneBluetoothSection(context),
+    );
   }
 
-
-  Widget _buildHeadphoneBluetoothSection() {
+  Widget _buildHeadphoneBluetoothSection(BuildContext context) {
     return SettingCard(
-      title: 'Tai nghe / Bluetooth',
+      title: context.tr(AppString.settingsBluetooth),
       icon: Icons.headphones_battery_outlined,
       children: [
         SwitchTile(
-          title: 'Tự phát khi kết nối tai nghe',
-          subtitle: 'Khi cắm tai nghe hoặc kết nối Bluetooth, tự phát bài đang nghe',
+          title: context.tr(AppString.settingsBluetoothAutoplay),
+          subtitle: context.tr(AppString.settingsBluetoothAutoplayDesc),
           value: _autoPlayWhenHeadphoneConnected,
           onChanged: (value) async {
             await _repo.setBool(
@@ -69,8 +72,8 @@ class _SettingHeadphoneBluetoothViewState extends State<SettingHeadphoneBluetoot
           },
         ),
         SwitchTile(
-          title: 'Tạm dừng khi ngắt tai nghe',
-          subtitle: 'Tự pause khi rút tai nghe hoặc mất kết nối Bluetooth',
+          title: context.tr(AppString.settingsBluetoothPause),
+          subtitle: context.tr(AppString.settingsBluetoothPauseDesc),
           value: _pauseWhenHeadphoneDisconnected,
           onChanged: (value) async {
             await _repo.setBool(
@@ -84,14 +87,11 @@ class _SettingHeadphoneBluetoothViewState extends State<SettingHeadphoneBluetoot
           },
         ),
         SwitchTile(
-          title: 'Hiển thị tên thiết bị Bluetooth',
-          subtitle: 'Hiển thị tên tai nghe trong mini player nếu có',
+          title: context.tr(AppString.settingsBluetoothDeviceName),
+          subtitle: context.tr(AppString.settingsBluetoothDeviceNameDesc),
           value: _showBluetoothDeviceName,
           onChanged: (value) async {
-            await _repo.setBool(
-              SettingKeys.showBluetoothDeviceName,
-              value,
-            );
+            await _repo.setBool(SettingKeys.showBluetoothDeviceName, value);
 
             setState(() {
               _showBluetoothDeviceName = value;

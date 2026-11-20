@@ -7,9 +7,10 @@ Owner: `Project Owner`
 ## Milestones
 
 - `phase-00`: framework adoption, configuration and validation.
+- `phase-01`: refactor and improve UX for the music browsing and playback flows.
 
 ## Active phase
 
-- Phase: `phase-00`
-- Plan: `phases/phase-00/PHASE_PLAN.md`
+- Phase: `phase-01`
+- Plan: `phases/phase-01/PHASE_PLAN.md`
 - Status: `IN_PROGRESS`

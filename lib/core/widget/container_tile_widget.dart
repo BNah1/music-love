@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:musiclove/core/constant/app_style.dart';
 
 class ContainerCustomTile extends StatelessWidget {
-   const ContainerCustomTile({super.key, required this.color, required this.child, required this.paddingInside});
+  const ContainerCustomTile({
+    super.key,
+    required this.color,
+    required this.child,
+    required this.paddingInside,
+  });
 
   final Color color;
   final Widget child;
@@ -11,10 +16,10 @@ class ContainerCustomTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding:  const EdgeInsets.symmetric(horizontal: AppSize.paddingDashBoard),
+      padding: const EdgeInsets.symmetric(horizontal: AppSize.paddingDashBoard),
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
-        padding:  EdgeInsets.all(paddingInside),
+        padding: EdgeInsets.all(paddingInside),
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(AppSize.borderTile),
@@ -26,7 +31,7 @@ class ContainerCustomTile extends StatelessWidget {
             ),
           ],
         ),
-        child: child
+        child: child,
       ),
     );
   }

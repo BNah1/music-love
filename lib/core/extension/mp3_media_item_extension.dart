@@ -8,6 +8,9 @@ extension Mp3MediaItemExtension on Mp3FileEntity {
       title: title,
       artist: artist,
       duration: Duration(milliseconds: duration),
+      artUri: artworkPath != null && artworkPath!.isNotEmpty
+          ? Uri.file(artworkPath!)
+          : null,
       extras: {
         'path': path,
         'album': album,

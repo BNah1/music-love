@@ -4,11 +4,11 @@ Edit this file to change how agents work. Agents re-read it before assigning wor
 
 | Setting | Current value | Choices |
 |---|---|---|
-| Execution mode | SOLO | SOLO / PEER / SUBAGENT |
+| Execution mode | PEER | SOLO / PEER / SUBAGENT |
 | Autonomy | PHASE | CONFIRM / PHASE / AUTO |
 | Run state | RUN | RUN / PAUSE |
-| Scope | phase-00 / framework adoption | Task IDs, phase, or explicit scope |
-| Available agents | codex: Planner, Executor, Reviewer, Tester | Agent identities and available roles |
+| Scope | phase-01 / refactor and improve UX | Task IDs, phase, or explicit scope |
+| Available agents | codex: PM, Reviewer; antigravity: Coder | Agent identities and available roles |
 | Quota fallback | TAKEOVER | TAKEOVER / PAUSE |
 | Review after fallback | REQUIRE_INDEPENDENT | REQUIRE_INDEPENDENT / ALLOW_SELF_REVIEW |
 | Consecutive unsuccessful loops | 3 | Owner-adjustable limit |

@@ -13,6 +13,7 @@ class MusicAudioHandler extends BaseAudioHandler
 
   Timer? _cacheTimer;
   Future<void> _modeChangeQueue = Future<void>.value();
+  bool _isResettingCompletion = false;
 
   MusicAudioHandler() {
     _listenPlaybackState();
@@ -46,7 +47,30 @@ class MusicAudioHandler extends BaseAudioHandler
           repeatMode: _repeatMode,
         ),
       );
+      if (_player.processingState == ProcessingState.completed &&
+          _repeatMode == AudioServiceRepeatMode.none) {
+        unawaited(_resetCompletedPlayback());
+      }
     });
+  }
+
+  Future<void> _resetCompletedPlayback() async {
+    if (_isResettingCompletion) return;
+    _isResettingCompletion = true;
+    try {
+      await _player.pause();
+      await _player.seek(Duration.zero);
+      playbackState.add(
+        playbackState.value.copyWith(
+          playing: false,
+          processingState: AudioProcessingState.ready,
+          updatePosition: Duration.zero,
+        ),
+      );
+      await _saveLastSession();
+    } finally {
+      _isResettingCompletion = false;
+    }
   }
 
   void _listenCurrentIndex() {
