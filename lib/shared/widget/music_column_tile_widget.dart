@@ -12,22 +12,33 @@ class MusicColumnTileWidget extends StatelessWidget {
     required this.song,
     this.currentPlaylistId,
     this.onChanged,
+    this.onLongPress,
+    this.isSelected = false,
+    this.trailing,
   });
 
   final Mp3FileEntity song;
   final String? currentPlaylistId;
   final VoidCallback? onChanged;
+  final VoidCallback? onLongPress;
+  final bool isSelected;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     final appTheme = AppTheme.extensionOf(context);
 
     return ListTile(
+      selected: isSelected,
+      selectedTileColor: appTheme.softAccentColor.withOpacity(0.22),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       contentPadding: const EdgeInsets.symmetric(vertical: 8),
+      onLongPress: onLongPress,
       onTap: () {
         final location = Uri(
           path: '${AppRoutes.playMusic}/${song.id}',
-          queryParameters: currentPlaylistId != null && currentPlaylistId!.isNotEmpty
+          queryParameters:
+              currentPlaylistId != null && currentPlaylistId!.isNotEmpty
               ? {'playlistId': currentPlaylistId!}
               : null,
         ).toString();
@@ -68,11 +79,13 @@ class MusicColumnTileWidget extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: TextStyle(color: appTheme.subtitleColor),
       ),
-      trailing: MoreVertWidget(
-        song: song,
-        currentPlaylistId: currentPlaylistId,
-        onChanged: onChanged,
-      ),
+      trailing:
+          trailing ??
+          MoreVertWidget(
+            song: song,
+            currentPlaylistId: currentPlaylistId,
+            onChanged: onChanged,
+          ),
     );
   }
 }

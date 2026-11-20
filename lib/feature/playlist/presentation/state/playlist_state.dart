@@ -3,7 +3,6 @@ import 'package:musiclove/core/state/base_state.dart';
 import 'package:musiclove/shared/entity/playlist_detail_enity.dart';
 import 'package:musiclove/shared/entity/playlist_entity.dart';
 
-
 class PlaylistState extends BaseState {
   final List<PlaylistEntity> playlists;
   final PlaylistDetailEntity? currentPlaylist;
@@ -11,7 +10,8 @@ class PlaylistState extends BaseState {
   const PlaylistState({
     this.playlists = const [],
     super.status = BaseStatus.initial,
-    super.errorMessage = '', this.currentPlaylist,
+    super.errorMessage = '',
+    this.currentPlaylist,
   });
 
   @override
@@ -25,7 +25,7 @@ class PlaylistState extends BaseState {
       playlists: playlists ?? this.playlists,
       status: status ?? this.status,
       errorMessage: errorMessage ?? this.errorMessage,
-        currentPlaylist: currentPlaylist ?? this.currentPlaylist
+      currentPlaylist: currentPlaylist ?? this.currentPlaylist,
     );
   }
 }

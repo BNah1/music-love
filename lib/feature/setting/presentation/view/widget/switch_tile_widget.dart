@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:musiclove/core/constant/theme.dart';
 
 class SwitchTile extends StatelessWidget {
-  const SwitchTile({super.key,
+  const SwitchTile({
+    super.key,
     required this.title,
     required this.subtitle,
     required this.value,
@@ -21,10 +22,7 @@ class SwitchTile extends StatelessWidget {
     return SwitchListTile(
       value: value,
       activeColor: appTheme.accentColor,
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.w600),
-      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Text(subtitle),
       onChanged: onChanged,
     );

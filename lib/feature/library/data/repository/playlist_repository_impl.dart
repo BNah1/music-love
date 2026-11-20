@@ -34,10 +34,7 @@ class PlaylistRepositoryImpl implements PlaylistRepository {
     required String playlistId,
     required String name,
   }) {
-    return localDataSource.renamePlaylist(
-      playlistId: playlistId,
-      name: name,
-    );
+    return localDataSource.renamePlaylist(playlistId: playlistId, name: name);
   }
 
   @override
@@ -48,6 +45,30 @@ class PlaylistRepositoryImpl implements PlaylistRepository {
     return localDataSource.addSongToPlaylist(
       playlistId: playlistId,
       songId: songId,
+    );
+  }
+
+  @override
+  Future<void> addSongsToPlaylists({
+    required List<String> playlistIds,
+    required List<String> songIds,
+  }) {
+    return localDataSource.addSongsToPlaylists(
+      playlistIds: playlistIds,
+      songIds: songIds,
+    );
+  }
+
+  @override
+  Future<void> reorderSongs({
+    required String playlistId,
+    required int oldIndex,
+    required int newIndex,
+  }) {
+    return localDataSource.reorderSongs(
+      playlistId: playlistId,
+      oldIndex: oldIndex,
+      newIndex: newIndex,
     );
   }
 
@@ -67,10 +88,7 @@ class PlaylistRepositoryImpl implements PlaylistRepository {
     required String playlistId,
     required String songId,
   }) {
-    return localDataSource.moveSongUp(
-      playlistId: playlistId,
-      songId: songId,
-    );
+    return localDataSource.moveSongUp(playlistId: playlistId, songId: songId);
   }
 
   @override
@@ -78,10 +96,7 @@ class PlaylistRepositoryImpl implements PlaylistRepository {
     required String playlistId,
     required String songId,
   }) {
-    return localDataSource.moveSongDown(
-      playlistId: playlistId,
-      songId: songId,
-    );
+    return localDataSource.moveSongDown(playlistId: playlistId, songId: songId);
   }
 
   @override
@@ -126,18 +141,15 @@ class PlaylistRepositoryImpl implements PlaylistRepository {
 
     final songs = playlist.songIds
         .map((songId) {
-      try {
-        return allSongs.firstWhere((song) => song.id == songId);
-      } catch (_) {
-        return null;
-      }
-    })
+          try {
+            return allSongs.firstWhere((song) => song.id == songId);
+          } catch (_) {
+            return null;
+          }
+        })
         .whereType<Mp3FileEntity>()
         .toList();
 
-    return PlaylistDetailEntity(
-      playlist: playlist,
-      songs: songs,
-    );
+    return PlaylistDetailEntity(playlist: playlist, songs: songs);
   }
 }

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:musiclove/core/constant/app_string.dart';
 import 'package:musiclove/core/constant/routes.dart';
 import 'package:musiclove/core/constant/theme.dart';
+import 'package:musiclove/core/widget/app_overlay.dart';
 import 'package:musiclove/feature/playlist/presentation/provider/playlist_provider.dart';
 import 'package:musiclove/feature/playlist/presentation/view/widget/edit_playlist_widget.dart';
 
@@ -21,7 +22,7 @@ class PlaylistView extends ConsumerWidget {
     Future<void> createPlaylist() async {
       final controller = TextEditingController();
 
-      await showDialog(
+      await AppOverlay.showModal<void>(
         context: context,
         builder: (toastContext) => AlertDialog(
           title: Text(toastContext.tr(AppString.playlistCreate)),

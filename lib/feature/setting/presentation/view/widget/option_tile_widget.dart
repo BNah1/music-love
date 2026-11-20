@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:musiclove/core/constant/theme.dart';
 
 class OptionTile extends StatelessWidget {
-  const OptionTile({super.key,
+  const OptionTile({
+    super.key,
     required this.title,
     required this.subtitle,
     required this.selected,
@@ -20,20 +21,14 @@ class OptionTile extends StatelessWidget {
 
     return ListTile(
       onTap: onTap,
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.w600),
-      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Text(subtitle),
       trailing: selected
-          ? Icon(
-        Icons.check_circle_rounded,
-        color: appTheme.accentColor,
-      )
+          ? Icon(Icons.check_circle_rounded, color: appTheme.accentColor)
           : Icon(
-        Icons.circle_outlined,
-        color: appTheme.unselectedIconColor.withOpacity(0.45),
-      ),
+              Icons.circle_outlined,
+              color: appTheme.unselectedIconColor.withOpacity(0.45),
+            ),
     );
   }
 }

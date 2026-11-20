@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:musiclove/core/constant/app_string.dart';
+import 'package:musiclove/core/widget/app_overlay.dart';
 import 'package:musiclove/feature/setting/domain/repository/setting_repository.dart';
 import 'package:musiclove/feature/setting/presentation/view/widget/action_tile_widget.dart';
 import 'package:musiclove/feature/setting/presentation/view/widget/bottom_option_tile.dart';
@@ -64,9 +65,7 @@ class _SettingPlayerMusicViewState extends State<SettingPlayerMusicView> {
 
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.tr(AppString.playerCacheCleared))),
-    );
+    AppOverlay.showToast(context, context.tr(AppString.playerCacheCleared));
   }
 
   @override
@@ -134,10 +133,8 @@ class _SettingPlayerMusicViewState extends State<SettingPlayerMusicView> {
   }
 
   Future<void> _showRepeatModeSheet(BuildContext context) async {
-    await showModalBottomSheet(
+    await AppOverlay.showSheet(
       context: context,
-      useRootNavigator: true,
-      showDragHandle: true,
       builder: (bottomSheetContext) {
         return SafeArea(
           child: Column(

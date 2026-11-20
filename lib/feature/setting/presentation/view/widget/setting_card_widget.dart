@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:musiclove/core/constant/theme.dart';
 
 class SettingCard extends StatelessWidget {
-  const SettingCard({super.key,
+  const SettingCard({
+    super.key,
     required this.title,
     required this.icon,
     required this.children,
@@ -34,10 +35,7 @@ class SettingCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(18, 16, 18, 8),
             child: Row(
               children: [
-                Icon(
-                  icon,
-                  color: appTheme.accentColor,
-                ),
+                Icon(icon, color: appTheme.accentColor),
                 const SizedBox(width: 10),
                 Text(
                   title,

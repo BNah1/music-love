@@ -23,6 +23,12 @@ class AppString {
   static const String homeEmpty = 'home_empty';
   static const String homeRetry = 'home_retry';
   static const String homeError = 'home_error';
+  static const String homeSeeAll = 'home_see_all';
+  static const String allSongsTitle = 'all_songs_title';
+  static const String songSort = 'song_sort';
+  static const String songSortNewest = 'song_sort_newest';
+  static const String songSortTitle = 'song_sort_title';
+  static const String songSortArtist = 'song_sort_artist';
 
   // Playlist Screen
   static const String playlistTitle = 'playlist_title';
@@ -42,6 +48,12 @@ class AppString {
   static const String playlistNoPlaylistsYet = 'playlist_no_playlists_yet';
   static const String playlistAdded = 'playlist_added';
   static const String playlistRemoved = 'playlist_removed';
+  static const String playlistCreateNew = 'playlist_create_new';
+  static const String playlistSearchHint = 'playlist_search_hint';
+  static const String playlistSelectedCount = 'playlist_selected_count';
+  static const String playlistAddSelected = 'playlist_add_selected';
+  static const String playlistRemoveSelected = 'playlist_remove_selected';
+  static const String playlistAddedSelected = 'playlist_added_selected';
 
   // Context Menu & Actions
   static const String menuRename = 'menu_rename';

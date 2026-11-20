@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:musiclove/core/constant/app_string.dart';
 import 'package:musiclove/core/constant/theme.dart';
+import 'package:musiclove/core/widget/app_overlay.dart';
 import 'package:musiclove/feature/playlist/presentation/provider/playlist_provider.dart';
 import 'package:musiclove/shared/entity/mp3_file_entity.dart';
 
@@ -173,7 +174,6 @@ class MoreVertWidget extends ConsumerWidget {
     required BuildContext context,
     required WidgetRef ref,
   }) async {
-    final appTheme = AppTheme.extensionOf(context);
     final notifier = ref.read(playlistProvider.notifier);
 
     await notifier.loadPlaylists();
@@ -181,21 +181,10 @@ class MoreVertWidget extends ConsumerWidget {
 
     if (!context.mounted) return;
 
-    if (playlists.isEmpty) {
-      _showSnackBar(context, context.tr(AppString.playlistNoPlaylistsYet));
-      return;
-    }
-
-    await showModalBottomSheet(
+    await AppOverlay.showSheet(
       context: context,
-      backgroundColor: appTheme.navBackground,
-      showDragHandle: true,
-      useRootNavigator: true,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
       builder: (bottomSheetContext) {
+        final appTheme = AppTheme.extensionOf(bottomSheetContext);
         final maxHeight = MediaQuery.sizeOf(bottomSheetContext).height * 0.62;
         return SafeArea(
           child: Padding(
@@ -238,99 +227,134 @@ class MoreVertWidget extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: maxHeight),
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: playlists.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (_, index) {
-                      final playlist = playlists[index];
-                      final alreadyAdded = playlist.songIds.contains(song.id);
-                      return Material(
-                        color: appTheme.cardBackground,
-                        borderRadius: BorderRadius.circular(16),
-                        child: InkWell(
+                if (playlists.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Center(
+                      child: Text(
+                        bottomSheetContext.tr(AppString.playlistNoPlaylistsYet),
+                        style: TextStyle(color: appTheme.subtitleColor),
+                      ),
+                    ),
+                  )
+                else
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: maxHeight),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: playlists.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemBuilder: (_, index) {
+                        final playlist = playlists[index];
+                        final alreadyAdded = playlist.songIds.contains(song.id);
+                        return Material(
+                          color: appTheme.cardBackground,
                           borderRadius: BorderRadius.circular(16),
-                          onTap: alreadyAdded
-                              ? null
-                              : () async {
-                                  await notifier.addSongToPlaylist(
-                                    playlistId: playlist.id,
-                                    songId: song.id,
-                                  );
-                                  if (bottomSheetContext.mounted) {
-                                    Navigator.pop(bottomSheetContext);
-                                    _showSnackBar(
-                                      context,
-                                      context.tr(
-                                        AppString.playlistAdded,
-                                        namedArgs: {'name': playlist.name},
-                                      ),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: alreadyAdded
+                                ? null
+                                : () async {
+                                    await notifier.addSongToPlaylist(
+                                      playlistId: playlist.id,
+                                      songId: song.id,
                                     );
-                                  }
-                                  onChanged?.call();
-                                },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 10,
-                            ),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  backgroundColor: appTheme.softAccentColor,
-                                  child: Icon(
-                                    Icons.queue_music_rounded,
-                                    color: appTheme.accentColor,
+                                    if (bottomSheetContext.mounted) {
+                                      Navigator.pop(bottomSheetContext);
+                                      AppOverlay.showToast(
+                                        context,
+                                        context.tr(
+                                          AppString.playlistAdded,
+                                          namedArgs: {'name': playlist.name},
+                                        ),
+                                      );
+                                    }
+                                    onChanged?.call();
+                                  },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 10,
+                              ),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor: appTheme.softAccentColor,
+                                    child: Icon(
+                                      Icons.queue_music_rounded,
+                                      color: appTheme.accentColor,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        playlist.name,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          color: appTheme.textColor,
-                                          fontWeight: FontWeight.w600,
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          playlist.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: appTheme.textColor,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        bottomSheetContext.tr(
-                                          AppString.playlistSongsCount,
-                                          namedArgs: {
-                                            'count':
-                                                '${playlist.songIds.length}',
-                                          },
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          bottomSheetContext.tr(
+                                            AppString.playlistSongsCount,
+                                            namedArgs: {
+                                              'count':
+                                                  '${playlist.songIds.length}',
+                                            },
+                                          ),
+                                          style: TextStyle(
+                                            color: appTheme.subtitleColor,
+                                            fontSize: 12,
+                                          ),
                                         ),
-                                        style: TextStyle(
-                                          color: appTheme.subtitleColor,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                Icon(
-                                  alreadyAdded
-                                      ? Icons.check_circle_rounded
-                                      : Icons.add_circle_outline_rounded,
-                                  color: alreadyAdded
-                                      ? appTheme.accentColor
-                                      : appTheme.subtitleColor,
-                                ),
-                              ],
+                                  Icon(
+                                    alreadyAdded
+                                        ? Icons.check_circle_rounded
+                                        : Icons.add_circle_outline_rounded,
+                                    color: alreadyAdded
+                                        ? appTheme.accentColor
+                                        : appTheme.subtitleColor,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
+                        );
+                      },
+                    ),
+                  ),
+                const Divider(height: 20),
+                InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () async {
+                    Navigator.pop(bottomSheetContext);
+                    await _showCreatePlaylistModal(context, notifier);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Row(
+                      children: [
+                        Icon(Icons.add_rounded, color: appTheme.accentColor),
+                        const SizedBox(width: 12),
+                        Text(
+                          bottomSheetContext.tr(AppString.playlistCreateNew),
+                          style: TextStyle(
+                            color: appTheme.textColor,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      );
-                    },
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -339,6 +363,41 @@ class MoreVertWidget extends ConsumerWidget {
         );
       },
     );
+  }
+
+  Future<void> _showCreatePlaylistModal(
+    BuildContext context,
+    PlaylistNotifier notifier,
+  ) async {
+    final controller = TextEditingController();
+    await AppOverlay.showModal<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(dialogContext.tr(AppString.playlistCreate)),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: dialogContext.tr(AppString.playlistNameHint),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(dialogContext.tr(AppString.commonCancel)),
+          ),
+          FilledButton(
+            onPressed: () async {
+              if (controller.text.trim().isEmpty) return;
+              await notifier.createPlaylist(controller.text);
+              if (dialogContext.mounted) Navigator.pop(dialogContext);
+            },
+            child: Text(dialogContext.tr(AppString.commonCreate)),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
   }
 
   // --- HELPER LOGIC METHODS ---
@@ -391,18 +450,8 @@ class MoreVertWidget extends ConsumerWidget {
     await onRemoveFromAudioHandler?.call(song.id);
 
     if (context.mounted) {
-      _showSnackBar(context, context.tr(AppString.playlistRemoved));
+      AppOverlay.showToast(context, context.tr(AppString.playlistRemoved));
     }
     onChanged?.call();
-  }
-
-  void _showSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
   }
 }

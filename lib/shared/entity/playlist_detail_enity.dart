@@ -5,8 +5,5 @@ class PlaylistDetailEntity {
   final PlaylistEntity playlist;
   final List<Mp3FileEntity> songs;
 
-  const PlaylistDetailEntity({
-    required this.playlist,
-    required this.songs,
-  });
+  const PlaylistDetailEntity({required this.playlist, required this.songs});
 }

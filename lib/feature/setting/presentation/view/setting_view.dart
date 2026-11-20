@@ -5,6 +5,7 @@ import 'package:musiclove/core/constant/app_config.dart';
 import 'package:musiclove/core/constant/app_string.dart';
 import 'package:musiclove/core/constant/routes.dart';
 import 'package:musiclove/core/constant/theme.dart';
+import 'package:musiclove/core/widget/app_overlay.dart';
 import 'package:musiclove/feature/setting/domain/repository/setting_repository.dart';
 import 'package:musiclove/feature/setting/presentation/view/widget/bottom_option_tile.dart';
 import 'package:musiclove/feature/setting/presentation/view/widget/select_tile_widget.dart';
@@ -38,10 +39,8 @@ class _SettingViewState extends State<SettingView> {
   }
 
   Future<void> _showLanguageSheet() async {
-    await showModalBottomSheet(
+    await AppOverlay.showSheet(
       context: context,
-      useRootNavigator: true,
-      showDragHandle: true,
       builder: (bottomSheetContext) {
         return SafeArea(
           child: Column(

@@ -75,7 +75,7 @@ class MusicRowTileWidget extends StatelessWidget {
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),

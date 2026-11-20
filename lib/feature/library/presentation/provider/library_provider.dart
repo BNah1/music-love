@@ -17,16 +17,13 @@ final playlistBoxProvider = Provider<Box>((ref) {
 });
 
 final songLocalDataSourceProvider = Provider<SongLocalDataSource>((ref) {
-  return SongLocalDataSourceImpl(
-    box: ref.read(songBoxProvider),
-  );
+  return SongLocalDataSourceImpl(box: ref.read(songBoxProvider));
 });
 
-final playlistLocalDataSourceProvider =
-Provider<PlaylistLocalDataSource>((ref) {
-  return PlaylistLocalDataSourceImpl(
-    box: ref.read(playlistBoxProvider),
-  );
+final playlistLocalDataSourceProvider = Provider<PlaylistLocalDataSource>((
+  ref,
+) {
+  return PlaylistLocalDataSourceImpl(box: ref.read(playlistBoxProvider));
 });
 
 final musicScannerDataSourceProvider = Provider<MusicScannerDataSource>((ref) {

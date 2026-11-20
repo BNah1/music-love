@@ -23,7 +23,7 @@ class CustomButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: (){
+      onTap: () {
         if (kDebugMode) {
           print('Tap < $text >');
         }

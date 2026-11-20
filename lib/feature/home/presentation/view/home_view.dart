@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:musiclove/core/constant/app_enum.dart';
 import 'package:musiclove/core/constant/app_string.dart';
 import 'package:musiclove/core/constant/routes.dart';
+import 'package:musiclove/core/constant/song_sort_option.dart';
 import 'package:musiclove/core/constant/theme.dart';
 import 'package:musiclove/feature/home/presentation/provider/home_provider.dart';
 import 'package:musiclove/feature/home/presentation/state/home_state.dart';
@@ -15,6 +16,7 @@ import 'package:musiclove/shared/entity/playlist_entity.dart';
 import 'package:musiclove/shared/entity/mp3_file_entity.dart';
 import 'package:musiclove/shared/widget/music_column_tile_widget.dart';
 import 'package:musiclove/shared/widget/music_row_tile_widget.dart';
+import 'package:musiclove/shared/widget/song_sort_menu.dart';
 
 class HomeView extends ConsumerWidget {
   const HomeView({super.key});
@@ -39,6 +41,7 @@ class HomeView extends ConsumerWidget {
             onSearchChanged: notifier.searchSongs,
             onClearSearch: notifier.clearSearch,
             onSearchPressed: notifier.pressSearch,
+            onSortChanged: notifier.changeSort,
             playlists: playlists,
           ),
         ),
@@ -54,6 +57,7 @@ class HomeView extends ConsumerWidget {
     required VoidCallback onRetryPressed,
     required ValueChanged<String> onSearchChanged,
     required VoidCallback onClearSearch,
+    required ValueChanged<SongSortOption> onSortChanged,
     required List<PlaylistEntity> playlists,
   }) {
     if (state.status == BaseStatus.loading && state.songs.isEmpty) {
@@ -113,8 +117,46 @@ class HomeView extends ConsumerWidget {
             const SizedBox(height: 15),
             _RecentList(songs: state.songs),
             const SizedBox(height: 30),
-            _SectionTitle(title: context.tr(AppString.homeAllSongs)),
-            _SuggestionList(songs: state.songs),
+            Row(
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: _SectionTitle(
+                          title: context.tr(AppString.homeAllSongs),
+                        ),
+                      ),
+                      SongSortMenu(value: state.sortOption, onChanged: onSortChanged),
+                    ],
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: () => context.push(AppRoutes.allSongs),
+                    // label: Text(context.tr(AppString.homeSeeAll)),
+                    label: Text(''),
+                    icon: const Icon(Icons.arrow_forward_ios,size: 25,),
+                    iconAlignment: IconAlignment.end,
+                  ),
+                ),
+              ],
+            ),
+
+            _SuggestionList(
+              songs: state.sortOption.sort(state.songs).take(10).toList(),
+            ),
+
+            Align(
+              alignment: Alignment.center,
+              child: TextButton.icon(
+                onPressed: () => context.push(AppRoutes.allSongs),
+                label: Text(context.tr(AppString.homeSeeAll)),
+                icon: const Icon(Icons.chevron_right_rounded),
+                iconAlignment: IconAlignment.end,
+              ),
+            ),
           ],
 
           const SizedBox(height: 30),

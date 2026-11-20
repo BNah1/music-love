@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:musiclove/core/constant/app_string.dart';
+import 'package:musiclove/core/widget/app_overlay.dart';
 import 'package:musiclove/feature/playlist/presentation/provider/playlist_provider.dart';
 import 'package:musiclove/shared/entity/playlist_entity.dart';
 
@@ -65,10 +66,8 @@ class EditPlaylistWidget extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
   ) async {
-    await showModalBottomSheet(
+    await AppOverlay.showSheet(
       context: context,
-      showDragHandle: true,
-      useRootNavigator: false,
       builder: (sheetContext) => _buildSheetContent(sheetContext, context, ref),
     );
   }
@@ -77,7 +76,7 @@ class EditPlaylistWidget extends ConsumerWidget {
     final controller = TextEditingController(text: playlist.name);
     final playlistNotifier = ref.read(playlistProvider.notifier);
 
-    final result = await showDialog<String>(
+    final result = await AppOverlay.showModal<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(dialogContext.tr(AppString.playlistRename)),
@@ -120,9 +119,7 @@ class EditPlaylistWidget extends ConsumerWidget {
       );
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.tr(AppString.playlistRenamed))),
-        );
+        AppOverlay.showToast(context, context.tr(AppString.playlistRenamed));
         onRenamed?.call();
       }
     } finally {
@@ -134,7 +131,7 @@ class EditPlaylistWidget extends ConsumerWidget {
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
     final playlistNotifier = ref.read(playlistProvider.notifier);
 
-    final isConfirmed = await showDialog<bool>(
+    final isConfirmed = await AppOverlay.showModal<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(dialogContext.tr(AppString.playlistDelete)),
@@ -166,9 +163,7 @@ class EditPlaylistWidget extends ConsumerWidget {
     await playlistNotifier.deletePlaylist(playlist.id);
 
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.tr(AppString.playlistDeleted))),
-    );
+    AppOverlay.showToast(context, context.tr(AppString.playlistDeleted));
     onDeleted?.call();
   }
 }

@@ -20,15 +20,23 @@ abstract class PlaylistRepository {
     required String songId,
   });
 
+  Future<void> addSongsToPlaylists({
+    required List<String> playlistIds,
+    required List<String> songIds,
+  });
+
+  Future<void> reorderSongs({
+    required String playlistId,
+    required int oldIndex,
+    required int newIndex,
+  });
+
   Future<void> removeSongFromPlaylist({
     required String playlistId,
     required String songId,
   });
 
-  Future<void> moveSongUp({
-    required String playlistId,
-    required String songId,
-  });
+  Future<void> moveSongUp({required String playlistId, required String songId});
 
   Future<void> moveSongDown({
     required String playlistId,

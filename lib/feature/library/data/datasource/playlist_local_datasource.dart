@@ -19,15 +19,23 @@ abstract class PlaylistLocalDataSource {
     required String songId,
   });
 
+  Future<void> addSongsToPlaylists({
+    required List<String> playlistIds,
+    required List<String> songIds,
+  });
+
+  Future<void> reorderSongs({
+    required String playlistId,
+    required int oldIndex,
+    required int newIndex,
+  });
+
   Future<void> removeSongFromPlaylist({
     required String playlistId,
     required String songId,
   });
 
-  Future<void> moveSongUp({
-    required String playlistId,
-    required String songId,
-  });
+  Future<void> moveSongUp({required String playlistId, required String songId});
 
   Future<void> moveSongDown({
     required String playlistId,
@@ -52,9 +60,7 @@ abstract class PlaylistLocalDataSource {
 class PlaylistLocalDataSourceImpl implements PlaylistLocalDataSource {
   final Box box;
 
-  PlaylistLocalDataSourceImpl({
-    required this.box,
-  });
+  PlaylistLocalDataSourceImpl({required this.box});
 
   @override
   Future<void> createPlaylist(String name) async {
@@ -69,10 +75,7 @@ class PlaylistLocalDataSourceImpl implements PlaylistLocalDataSource {
       updatedAt: now,
     );
 
-    await box.put(
-      id,
-      playlist.toMap(),
-    );
+    await box.put(id, playlist.toMap());
   }
 
   @override
@@ -81,17 +84,13 @@ class PlaylistLocalDataSourceImpl implements PlaylistLocalDataSource {
 
     if (data == null) return null;
 
-    return PlaylistModel.fromMap(
-      Map<String, dynamic>.from(data),
-    );
+    return PlaylistModel.fromMap(Map<String, dynamic>.from(data));
   }
 
   @override
   Future<List<PlaylistEntity>> getAllPlaylists() async {
     return box.values.map((item) {
-      return PlaylistModel.fromMap(
-        Map<String, dynamic>.from(item),
-      );
+      return PlaylistModel.fromMap(Map<String, dynamic>.from(item));
     }).toList();
   }
 
@@ -124,14 +123,56 @@ class PlaylistLocalDataSourceImpl implements PlaylistLocalDataSource {
     if (playlist.songIds.contains(songId)) return;
 
     final updated = playlist.copyWith(
-      songIds: [
-        ...playlist.songIds,
-        songId,
-      ],
+      songIds: [...playlist.songIds, songId],
       updatedAt: DateTime.now().millisecondsSinceEpoch,
     );
 
     await _savePlaylist(updated);
+  }
+
+  @override
+  Future<void> addSongsToPlaylists({
+    required List<String> playlistIds,
+    required List<String> songIds,
+  }) async {
+    for (final playlistId in playlistIds) {
+      final playlist = getPlaylistById(playlistId);
+      if (playlist == null) continue;
+      final merged = [...playlist.songIds];
+      for (final songId in songIds) {
+        if (!merged.contains(songId)) merged.add(songId);
+      }
+      await _savePlaylist(
+        playlist.copyWith(
+          songIds: merged,
+          updatedAt: DateTime.now().millisecondsSinceEpoch,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<void> reorderSongs({
+    required String playlistId,
+    required int oldIndex,
+    required int newIndex,
+  }) async {
+    final playlist = getPlaylistById(playlistId);
+    if (playlist == null ||
+        oldIndex < 0 ||
+        oldIndex >= playlist.songIds.length) {
+      return;
+    }
+    final ids = [...playlist.songIds];
+    final targetIndex = oldIndex < newIndex ? newIndex - 1 : newIndex;
+    final songId = ids.removeAt(oldIndex);
+    ids.insert(targetIndex.clamp(0, ids.length), songId);
+    await _savePlaylist(
+      playlist.copyWith(
+        songIds: ids,
+        updatedAt: DateTime.now().millisecondsSinceEpoch,
+      ),
+    );
   }
 
   @override
@@ -168,9 +209,7 @@ class PlaylistLocalDataSourceImpl implements PlaylistLocalDataSource {
 
     if (index <= 0) return;
 
-    final updatedSongIds = [
-      ...playlist.songIds,
-    ];
+    final updatedSongIds = [...playlist.songIds];
 
     final temp = updatedSongIds[index - 1];
     updatedSongIds[index - 1] = updatedSongIds[index];
@@ -197,9 +236,7 @@ class PlaylistLocalDataSourceImpl implements PlaylistLocalDataSource {
 
     if (index < 0 || index >= playlist.songIds.length - 1) return;
 
-    final updatedSongIds = [
-      ...playlist.songIds,
-    ];
+    final updatedSongIds = [...playlist.songIds];
 
     final temp = updatedSongIds[index + 1];
     updatedSongIds[index + 1] = updatedSongIds[index];
@@ -222,9 +259,7 @@ class PlaylistLocalDataSourceImpl implements PlaylistLocalDataSource {
 
     if (playlist == null) return;
 
-    final updatedSongIds = [
-      ...playlist.songIds,
-    ];
+    final updatedSongIds = [...playlist.songIds];
 
     final removed = updatedSongIds.remove(songId);
 
@@ -249,9 +284,7 @@ class PlaylistLocalDataSourceImpl implements PlaylistLocalDataSource {
 
     if (playlist == null) return;
 
-    final updatedSongIds = [
-      ...playlist.songIds,
-    ];
+    final updatedSongIds = [...playlist.songIds];
 
     final removed = updatedSongIds.remove(songId);
 
@@ -289,9 +322,6 @@ class PlaylistLocalDataSourceImpl implements PlaylistLocalDataSource {
   Future<void> _savePlaylist(PlaylistEntity playlist) async {
     final model = PlaylistModel.fromEntity(playlist);
 
-    await box.put(
-      model.id,
-      model.toMap(),
-    );
+    await box.put(model.id, model.toMap());
   }
 }

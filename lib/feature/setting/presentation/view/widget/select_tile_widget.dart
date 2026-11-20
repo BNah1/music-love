@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:musiclove/core/constant/theme.dart';
 
 class SelectTile extends StatelessWidget {
-  const SelectTile({super.key,
+  const SelectTile({
+    super.key,
     required this.title,
     this.subtitle,
     required this.onTap,
@@ -18,10 +19,7 @@ class SelectTile extends StatelessWidget {
 
     return ListTile(
       onTap: onTap,
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.w600),
-      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: subtitle != null ? Text(subtitle!) : null,
       trailing: Icon(
         Icons.chevron_right_rounded,

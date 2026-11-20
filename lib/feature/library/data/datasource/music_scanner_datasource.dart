@@ -24,14 +24,11 @@ class MusicScannerDataSourceImpl implements MusicScannerDataSource {
   }
 
   Future<void> _manualRecursiveScan(
-      Directory dir,
-      List<Mp3FileEntity> songs,
-      ) async {
+    Directory dir,
+    List<Mp3FileEntity> songs,
+  ) async {
     try {
-      final entities = dir.list(
-        recursive: false,
-        followLinks: false,
-      );
+      final entities = dir.list(recursive: false, followLinks: false);
 
       await for (final entity in entities) {
         final path = entity.path;

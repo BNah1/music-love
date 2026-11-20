@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:musiclove/core/constant/theme.dart';
 
 class ActionTile extends StatelessWidget {
-  const ActionTile({super.key,
+  const ActionTile({
+    super.key,
     required this.title,
     required this.subtitle,
     required this.icon,
@@ -20,15 +21,9 @@ class ActionTile extends StatelessWidget {
 
     return ListTile(
       onTap: onTap,
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.w600),
-      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Text(subtitle),
-      trailing: Icon(
-        icon,
-        color: appTheme.accentColor,
-      ),
+      trailing: Icon(icon, color: appTheme.accentColor),
     );
   }
 }

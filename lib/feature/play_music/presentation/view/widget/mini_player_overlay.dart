@@ -61,7 +61,9 @@ class MiniPlayerOverlay extends ConsumerWidget {
                   child: Row(
                     children: [
                       CircleAvatar(
-                        backgroundColor: appTheme.softAccentColor.withOpacity(0.35),
+                        backgroundColor: appTheme.softAccentColor.withOpacity(
+                          0.35,
+                        ),
                         child: Icon(
                           Icons.music_note_rounded,
                           color: appTheme.accentColor,
@@ -93,7 +95,9 @@ class MiniPlayerOverlay extends ConsumerWidget {
                       ),
                       IconButton(
                         onPressed: () {
-                          isPlaying ? audioHandler.pause() : audioHandler.play();
+                          isPlaying
+                              ? audioHandler.pause()
+                              : audioHandler.play();
                         },
                         icon: Icon(
                           isPlaying
