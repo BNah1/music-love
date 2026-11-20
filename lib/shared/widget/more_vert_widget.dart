@@ -5,6 +5,7 @@ import 'package:musiclove/core/constant/app_string.dart';
 import 'package:musiclove/core/constant/theme.dart';
 import 'package:musiclove/core/widget/app_overlay.dart';
 import 'package:musiclove/feature/playlist/presentation/provider/playlist_provider.dart';
+import 'package:musiclove/feature/playlist/presentation/view/widget/playlist_name_dialog.dart';
 import 'package:musiclove/shared/entity/mp3_file_entity.dart';
 
 enum _MusicAction {
@@ -369,35 +370,13 @@ class MoreVertWidget extends ConsumerWidget {
     BuildContext context,
     PlaylistNotifier notifier,
   ) async {
-    final controller = TextEditingController();
-    await AppOverlay.showModal<void>(
+    final name = await showPlaylistNameDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(dialogContext.tr(AppString.playlistCreate)),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: dialogContext.tr(AppString.playlistNameHint),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(dialogContext.tr(AppString.commonCancel)),
-          ),
-          FilledButton(
-            onPressed: () async {
-              if (controller.text.trim().isEmpty) return;
-              await notifier.createPlaylist(controller.text);
-              if (dialogContext.mounted) Navigator.pop(dialogContext);
-            },
-            child: Text(dialogContext.tr(AppString.commonCreate)),
-          ),
-        ],
-      ),
+      title: context.tr(AppString.playlistCreate),
+      submitLabel: context.tr(AppString.commonCreate),
     );
-    controller.dispose();
+    if (name == null || name.isEmpty) return;
+    await notifier.createPlaylist(name);
   }
 
   // --- HELPER LOGIC METHODS ---

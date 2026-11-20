@@ -54,6 +54,11 @@ class AppString {
   static const String playlistAddSelected = 'playlist_add_selected';
   static const String playlistRemoveSelected = 'playlist_remove_selected';
   static const String playlistAddedSelected = 'playlist_added_selected';
+  static const String playlistAddSong = 'playlist_add_song';
+  static const String playlistAddMultipleSongs = 'playlist_add_multiple_songs';
+  static const String playlistChooseSongs = 'playlist_choose_songs';
+  static const String playlistAlreadyAdded = 'playlist_already_added';
+  static const String playlistAddCount = 'playlist_add_count';
 
   // Context Menu & Actions
   static const String menuRename = 'menu_rename';

@@ -5,9 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:musiclove/core/constant/app_string.dart';
 import 'package:musiclove/core/constant/routes.dart';
 import 'package:musiclove/core/constant/theme.dart';
-import 'package:musiclove/core/widget/app_overlay.dart';
 import 'package:musiclove/feature/playlist/presentation/provider/playlist_provider.dart';
 import 'package:musiclove/feature/playlist/presentation/view/widget/edit_playlist_widget.dart';
+import 'package:musiclove/feature/playlist/presentation/view/widget/playlist_name_dialog.dart';
 
 class PlaylistView extends ConsumerWidget {
   const PlaylistView({super.key});
@@ -20,39 +20,13 @@ class PlaylistView extends ConsumerWidget {
     final playlists = state.playlists;
 
     Future<void> createPlaylist() async {
-      final controller = TextEditingController();
-
-      await AppOverlay.showModal<void>(
+      final name = await showPlaylistNameDialog(
         context: context,
-        builder: (toastContext) => AlertDialog(
-          title: Text(toastContext.tr(AppString.playlistCreate)),
-          content: TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              hintText: toastContext.tr(AppString.playlistNameHint),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(toastContext),
-              child: Text(toastContext.tr(AppString.commonCancel)),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final name = controller.text.trim();
-                if (name.isEmpty) return;
-
-                await notifier.createPlaylist(name);
-
-                if (toastContext.mounted) {
-                  Navigator.pop(toastContext);
-                }
-              },
-              child: Text(toastContext.tr(AppString.commonCreate)),
-            ),
-          ],
-        ),
+        title: context.tr(AppString.playlistCreate),
+        submitLabel: context.tr(AppString.commonCreate),
       );
+      if (name == null || name.isEmpty) return;
+      await notifier.createPlaylist(name);
     }
 
     return Container(

@@ -48,6 +48,11 @@
   "playlist_add_selected": "Thêm vào playlist khác",
   "playlist_remove_selected": "Xóa các bài đã chọn",
   "playlist_added_selected": "Đã thêm các bài đã chọn vào playlist",
+  "playlist_add_song": "Thêm nhạc",
+  "playlist_add_multiple_songs": "Thêm hàng loạt",
+  "playlist_choose_songs": "Chọn bài cho {name}",
+  "playlist_already_added": "Đã có trong playlist",
+  "playlist_add_count": "Thêm {count} bài",
 
   "menu_rename": "Đổi tên",
   "menu_delete": "Xóa",

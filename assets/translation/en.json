@@ -48,6 +48,11 @@
   "playlist_add_selected": "Add to other playlists",
   "playlist_remove_selected": "Remove selected songs",
   "playlist_added_selected": "Added selected songs to playlists",
+  "playlist_add_song": "Add song",
+  "playlist_add_multiple_songs": "Add multiple songs",
+  "playlist_choose_songs": "Choose songs for {name}",
+  "playlist_already_added": "Already in playlist",
+  "playlist_add_count": "Add {count} songs",
 
   "menu_rename": "Rename",
   "menu_delete": "Delete",

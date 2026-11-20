@@ -1,10 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:musiclove/core/constant/app_string.dart';
+import 'package:musiclove/core/constant/routes.dart';
 import 'package:musiclove/core/widget/app_overlay.dart';
 import 'package:musiclove/feature/playlist/presentation/provider/playlist_provider.dart';
 import 'package:musiclove/shared/entity/playlist_entity.dart';
+import 'package:musiclove/feature/playlist/presentation/view/widget/playlist_name_dialog.dart';
 
 class EditPlaylistWidget extends ConsumerWidget {
   const EditPlaylistWidget({
@@ -35,6 +38,27 @@ class EditPlaylistWidget extends ConsumerWidget {
     return SafeArea(
       child: Wrap(
         children: [
+          ListTile(
+            leading: const Icon(Icons.music_note_rounded),
+            title: Text(sheetContext.tr(AppString.playlistAddSong)),
+            onTap: () {
+              Navigator.of(sheetContext).pop();
+              originalContext.push(
+                AppRoutes.addSongsToPlaylist(playlist.id, multiple: false),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.library_add_rounded),
+            title: Text(sheetContext.tr(AppString.playlistAddMultipleSongs)),
+            onTap: () {
+              Navigator.of(sheetContext).pop();
+              originalContext.push(
+                AppRoutes.addSongsToPlaylist(playlist.id, multiple: true),
+              );
+            },
+          ),
+          const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.edit_rounded),
             title: Text(sheetContext.tr(AppString.menuRename)),
@@ -73,58 +97,26 @@ class EditPlaylistWidget extends ConsumerWidget {
   }
 
   Future<void> _showRenameDialog(BuildContext context, WidgetRef ref) async {
-    final controller = TextEditingController(text: playlist.name);
     final playlistNotifier = ref.read(playlistProvider.notifier);
 
-    final result = await AppOverlay.showModal<String>(
+    final result = await showPlaylistNameDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(dialogContext.tr(AppString.playlistRename)),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: dialogContext.tr(AppString.playlistNameHint),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(dialogContext.tr(AppString.commonCancel)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              FocusManager.instance.primaryFocus?.unfocus();
-              Navigator.pop(dialogContext, controller.text);
-            },
-            child: Text(dialogContext.tr(AppString.commonSave)),
-          ),
-        ],
-      ),
+      title: context.tr(AppString.playlistRename),
+      initialValue: playlist.name,
     );
 
-    // Kiểm tra kết quả trước
-    if (result == null || result.trim().isEmpty) {
-      controller.dispose(); // Dispose sớm nếu người dùng hủy
-      return;
-    }
+    if (result == null || result.trim().isEmpty) return;
 
     final newName = result.trim();
 
-    try {
-      // Thực hiện logic cập nhật
-      await playlistNotifier.renamePlaylist(
-        playlistId: playlist.id,
-        name: newName,
-      );
+    await playlistNotifier.renamePlaylist(
+      playlistId: playlist.id,
+      name: newName,
+    );
 
-      if (context.mounted) {
-        AppOverlay.showToast(context, context.tr(AppString.playlistRenamed));
-        onRenamed?.call();
-      }
-    } finally {
-      // Đảm bảo dispose controller CUỐI CÙNG sau khi mọi tác vụ async và rebuild đã xong
-      controller.dispose();
+    if (context.mounted) {
+      AppOverlay.showToast(context, context.tr(AppString.playlistRenamed));
+      onRenamed?.call();
     }
   }
 

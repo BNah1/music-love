@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:musiclove/feature/library/data/datasource/music_scanner_datasource.dart';
+import 'package:musiclove/feature/library/data/datasource/artwork_cache_datasource.dart';
 import 'package:musiclove/feature/library/data/datasource/playlist_local_datasource.dart';
 import 'package:musiclove/feature/library/data/datasource/song_local_datasource.dart';
 import 'package:musiclove/feature/library/data/repository/playlist_repository_impl.dart';
@@ -27,7 +28,13 @@ final playlistLocalDataSourceProvider = Provider<PlaylistLocalDataSource>((
 });
 
 final musicScannerDataSourceProvider = Provider<MusicScannerDataSource>((ref) {
-  return MusicScannerDataSourceImpl();
+  return MusicScannerDataSourceImpl(
+    artworkCacheDataSource: ref.read(artworkCacheDataSourceProvider),
+  );
+});
+
+final artworkCacheDataSourceProvider = Provider<ArtworkCacheDataSource>((ref) {
+  return ArtworkCacheDataSourceImpl();
 });
 
 final songRepositoryProvider = Provider<SongRepository>((ref) {

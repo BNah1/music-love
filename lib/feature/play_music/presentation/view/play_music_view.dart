@@ -12,6 +12,7 @@ import 'package:musiclove/core/constant/theme.dart';
 import 'package:musiclove/feature/library/data/model/mp3_file_model.dart';
 import 'package:musiclove/core/provider/audio_handler_provider.dart';
 import 'package:musiclove/feature/play_music/presentation/view/widget/play_music_button_widget.dart';
+import 'package:musiclove/shared/widget/song_artwork_widget.dart';
 
 import '../../../../core/audio/music_audio_handler.dart';
 
@@ -362,7 +363,11 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
                       return Column(
                         children: [
                           const Spacer(),
-                          _buildAlbumArt(isPlaying),
+                          _buildAlbumArt(
+                            isPlaying,
+                            mediaItem?.artUri?.toFilePath() ??
+                                displaySong?.artworkPath,
+                          ),
                           const SizedBox(height: 40),
                           _buildSongInfo(
                             mediaItem: mediaItem,
@@ -470,7 +475,7 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
     );
   }
 
-  Widget _buildAlbumArt(bool isPlaying) {
+  Widget _buildAlbumArt(bool isPlaying, String? artworkPath) {
     final appTheme = AppTheme.extensionOf(context);
 
     return RotationTransition(
@@ -490,14 +495,18 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
           padding: const EdgeInsets.all(15),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(size.width),
-            child: Container(
-              color: appTheme.cardBackground,
-              child: Icon(
-                Icons.music_note_rounded,
-                size: 100,
-                color: isPlaying
-                    ? appTheme.accentColor
-                    : appTheme.unselectedIconColor,
+            child: SongArtworkWidget(
+              artworkPath: artworkPath,
+              borderRadius: BorderRadius.circular(size.width),
+              fallback: Container(
+                color: appTheme.cardBackground,
+                child: Icon(
+                  Icons.music_note_rounded,
+                  size: 100,
+                  color: isPlaying
+                      ? appTheme.accentColor
+                      : appTheme.unselectedIconColor,
+                ),
               ),
             ),
           ),

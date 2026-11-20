@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:musiclove/feature/main_shell/presentation/view/main_shell_view.dart';
 import 'package:musiclove/feature/playlist/presentation/view/playlist_detail_view.dart';
 import 'package:musiclove/feature/playlist/presentation/view/playlist_view.dart';
+import 'package:musiclove/feature/playlist/presentation/view/playlist_song_picker_view.dart';
 import 'package:musiclove/feature/setting/presentation/view/setting_headphone_bluetooth_view.dart';
 import 'package:musiclove/feature/setting/presentation/view/setting_library_view.dart';
 import 'package:musiclove/feature/setting/presentation/view/setting_player_music_view.dart';
@@ -36,6 +37,7 @@ class AppRoutes {
   static const String home = '/home';
   static const String playList = '/playList';
   static const String playMusic = '/playMusic';
+  static const String playlistSongPicker = '/playlistSongPicker';
   static const String allSongs = '/allSongs';
   static const String setting = '/setting';
   static const String settingTheme = '/settingTheme';
@@ -132,6 +134,20 @@ class AppRoutes {
       ),
 
       GoRoute(
+        path: '$playlistSongPicker/:playlistId',
+        pageBuilder: (context, state) {
+          final playlistId = state.pathParameters['playlistId']!;
+          final isMultiple = state.uri.queryParameters['multiple'] == 'true';
+          return CupertinoPage(
+            child: PlaylistSongPickerView(
+              playlistId: playlistId,
+              isMultiple: isMultiple,
+            ),
+          );
+        },
+      ),
+
+      GoRoute(
         path: '${AppRoutes.playMusic}/:songId',
         pageBuilder: (context, state) {
           final songId = state.pathParameters['songId']!;
@@ -146,6 +162,10 @@ class AppRoutes {
   );
 
   static String playlistDetail(String id) => '$playList/$id';
+  static String addSongsToPlaylist(String id, {required bool multiple}) => Uri(
+    path: '$playlistSongPicker/$id',
+    queryParameters: {'multiple': '$multiple'},
+  ).toString();
 
   // Widget hiển thị khi sai Route
   static Widget _errorRoute(GoRouterState state) {

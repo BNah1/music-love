@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:musiclove/core/constant/routes.dart';
 import 'package:musiclove/core/constant/theme.dart';
 import 'package:musiclove/shared/entity/mp3_file_entity.dart';
+import 'package:musiclove/shared/widget/song_artwork_widget.dart';
 
 class MusicRowTileWidget extends StatelessWidget {
   const MusicRowTileWidget({super.key, required this.song});
@@ -41,11 +42,15 @@ class MusicRowTileWidget extends StatelessWidget {
                   gradient: appTheme.musicCardGradient,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Center(
-                  child: Icon(
-                    Icons.music_note,
-                    size: 40,
-                    color: appTheme.selectedIconColor,
+                child: SongArtworkWidget(
+                  artworkPath: song.artworkPath,
+                  borderRadius: BorderRadius.circular(20),
+                  fallback: Center(
+                    child: Icon(
+                      Icons.music_note,
+                      size: 40,
+                      color: appTheme.selectedIconColor,
+                    ),
                   ),
                 ),
               ),

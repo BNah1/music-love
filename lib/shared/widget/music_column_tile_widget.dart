@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:musiclove/core/constant/routes.dart';
 import 'package:musiclove/core/constant/theme.dart';
 import 'package:musiclove/shared/entity/mp3_file_entity.dart';
+import 'package:musiclove/shared/widget/song_artwork_widget.dart';
 
 import 'more_vert_widget.dart';
 
@@ -59,9 +60,13 @@ class MusicColumnTileWidget extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(
-          Icons.play_arrow_rounded,
-          color: appTheme.selectedIconColor,
+        child: SongArtworkWidget(
+          artworkPath: song.artworkPath,
+          borderRadius: BorderRadius.circular(12),
+          fallback: Icon(
+            Icons.play_arrow_rounded,
+            color: appTheme.selectedIconColor,
+          ),
         ),
       ),
       title: Text(
