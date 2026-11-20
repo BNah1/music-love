@@ -5,14 +5,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
-import 'package:musiclove/core/constant/app_enum.dart';
 import 'package:musiclove/core/constant/app_string.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:musiclove/core/constant/theme.dart';
 import 'package:musiclove/feature/library/data/model/mp3_file_model.dart';
 import 'package:musiclove/core/provider/audio_handler_provider.dart';
-import 'package:musiclove/feature/play_music/presentation/view/widget/play_music_button_widget.dart';
-import 'package:musiclove/shared/widget/song_artwork_widget.dart';
+import 'package:musiclove/shared/widget/player_display_widgets.dart';
 
 import '../../../../core/audio/music_audio_handler.dart';
 
@@ -47,8 +45,6 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
 
   bool _isDragging = false;
   double _dragValue = 0;
-
-  Size get size => MediaQuery.sizeOf(context);
 
   @override
   void initState() {
@@ -363,15 +359,18 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
                       return Column(
                         children: [
                           const Spacer(),
-                          _buildAlbumArt(
-                            isPlaying,
-                            mediaItem?.artUri?.toFilePath() ??
+                          PlayerArtwork(
+                            rotation: _animationController,
+                            isPlaying: isPlaying,
+                            artworkPath:
+                                mediaItem?.artUri?.toFilePath() ??
                                 displaySong?.artworkPath,
                           ),
                           const SizedBox(height: 40),
-                          _buildSongInfo(
-                            mediaItem: mediaItem,
-                            song: displaySong,
+                          PlayerSongInfo(
+                            title: mediaItem?.title ?? displaySong?.title ?? '',
+                            artist:
+                                mediaItem?.artist ?? displaySong?.artist ?? '',
                           ),
                           const SizedBox(height: 30),
                           _buildProgressBar(
@@ -475,88 +474,6 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
     );
   }
 
-  Widget _buildAlbumArt(bool isPlaying, String? artworkPath) {
-    final appTheme = AppTheme.extensionOf(context);
-
-    return RotationTransition(
-      turns: _animationController,
-      child: Container(
-        width: size.width * 0.75,
-        height: size.width * 0.75,
-        decoration: BoxDecoration(
-          color: appTheme.selectedIconColor.withOpacity(0.2),
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: appTheme.selectedIconColor.withOpacity(0.3),
-            width: 8,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(15),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(size.width),
-            child: SongArtworkWidget(
-              artworkPath: artworkPath,
-              borderRadius: BorderRadius.circular(size.width),
-              fallback: Container(
-                color: appTheme.cardBackground,
-                child: Icon(
-                  Icons.music_note_rounded,
-                  size: 100,
-                  color: isPlaying
-                      ? appTheme.accentColor
-                      : appTheme.unselectedIconColor,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSongInfo({
-    required MediaItem? mediaItem,
-    required Mp3FileModel? song,
-  }) {
-    final title = mediaItem?.title ?? song?.title ?? '';
-    final artist = mediaItem?.artist ?? song?.artist ?? '';
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 28),
-      child: Column(
-        children: [
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.extensionOf(context).selectedIconColor,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            artist,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 16,
-              color: AppTheme.extensionOf(
-                context,
-              ).selectedIconColor.withOpacity(0.72),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildProgressBar({required Duration duration}) {
     return StreamBuilder<Duration>(
       stream: AudioService.position,
@@ -566,90 +483,25 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
         final safeDuration = duration.inMilliseconds > 0
             ? duration
             : const Duration(milliseconds: 1);
-
         final safePosition = position > safeDuration ? safeDuration : position;
-
         final displayPosition = _isDragging
             ? Duration(milliseconds: _dragValue.toInt())
             : safePosition;
-
-        final maxValue = safeDuration.inMilliseconds.toDouble();
-
-        final sliderValue = displayPosition.inMilliseconds.toDouble().clamp(
-          0.0,
-          maxValue,
-        );
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30),
-          child: Column(
-            children: [
-              SliderTheme(
-                data: SliderTheme.of(context).copyWith(
-                  trackHeight: 4,
-                  activeTrackColor: AppTheme.extensionOf(
-                    context,
-                  ).selectedIconColor,
-                  inactiveTrackColor: AppTheme.extensionOf(
-                    context,
-                  ).selectedIconColor.withOpacity(0.3),
-                  thumbColor: AppTheme.extensionOf(context).selectedIconColor,
-                  thumbShape: const RoundSliderThumbShape(
-                    enabledThumbRadius: 6,
-                  ),
-                ),
-                child: Slider(
-                  value: sliderValue,
-                  max: maxValue,
-                  onChangeStart: (value) {
-                    setState(() {
-                      _isDragging = true;
-                      _dragValue = value;
-                    });
-                  },
-                  onChanged: (value) {
-                    setState(() {
-                      _dragValue = value;
-                    });
-                  },
-                  onChangeEnd: (value) {
-                    setState(() {
-                      _isDragging = false;
-                      _dragValue = value;
-                    });
-
-                    _seekTo(Duration(milliseconds: value.toInt()));
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _formatDuration(displayPosition),
-                      style: TextStyle(
-                        color: AppTheme.extensionOf(
-                          context,
-                        ).selectedIconColor.withOpacity(0.72),
-                        fontSize: 12,
-                      ),
-                    ),
-                    Text(
-                      _formatDuration(safeDuration),
-                      style: TextStyle(
-                        color: AppTheme.extensionOf(
-                          context,
-                        ).selectedIconColor.withOpacity(0.72),
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        return PlayerProgress(
+          position: displayPosition,
+          duration: duration,
+          onChangeStart: (value) => setState(() {
+            _isDragging = true;
+            _dragValue = value;
+          }),
+          onChanged: (value) => setState(() => _dragValue = value),
+          onChangeEnd: (value) {
+            setState(() {
+              _isDragging = false;
+              _dragValue = value;
+            });
+            _seekTo(Duration(milliseconds: value.toInt()));
+          },
         );
       },
     );
@@ -666,73 +518,16 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
     final isShuffleEnabled = shuffleMode != AudioServiceShuffleMode.none;
     final isRepeatEnabled = repeatMode != AudioServiceRepeatMode.none;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          GestureDetector(
-            onTap: () => _toggleShuffle(shuffleMode),
-            child: Icon(
-              Icons.shuffle_rounded,
-              color: isShuffleEnabled
-                  ? AppTheme.extensionOf(context).accentColor
-                  : AppTheme.extensionOf(
-                      context,
-                    ).selectedIconColor.withOpacity(0.54),
-              size: 24,
-            ),
-          ),
-          const Spacer(),
-          PlayMusicButtonWidget(
-            enumPlayMusic: EnumPlayMusic.back,
-            onTap: _skipToPrevious,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25),
-            child: PlayMusicButtonWidget(
-              onTap: () => _togglePlayPause(isPlaying),
-              enumPlayMusic: isPlaying
-                  ? EnumPlayMusic.pause
-                  : EnumPlayMusic.play,
-              isBigButton: true,
-            ),
-          ),
-          PlayMusicButtonWidget(
-            enumPlayMusic: EnumPlayMusic.next,
-            onTap: _skipToNext,
-          ),
-          const Spacer(),
-          GestureDetector(
-            onTap: () => _toggleRepeat(repeatMode),
-            child: Icon(
-              repeatMode == AudioServiceRepeatMode.one
-                  ? Icons.repeat_one_rounded
-                  : Icons.repeat_rounded,
-              color: isRepeatEnabled
-                  ? AppTheme.extensionOf(context).accentColor
-                  : AppTheme.extensionOf(
-                      context,
-                    ).selectedIconColor.withOpacity(0.54),
-              size: 24,
-            ),
-          ),
-        ],
-      ),
+    return PlayerControls(
+      isPlaying: isPlaying,
+      shuffleEnabled: isShuffleEnabled,
+      repeatEnabled: isRepeatEnabled,
+      repeatOne: repeatMode == AudioServiceRepeatMode.one,
+      onShuffle: () => _toggleShuffle(shuffleMode),
+      onPrevious: _skipToPrevious,
+      onPlayPause: () => _togglePlayPause(isPlaying),
+      onNext: _skipToNext,
+      onRepeat: () => _toggleRepeat(repeatMode),
     );
-  }
-
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-
-    final hours = duration.inHours;
-    final minutes = duration.inMinutes.remainder(60);
-    final seconds = duration.inSeconds.remainder(60);
-
-    if (hours > 0) {
-      return '${twoDigits(hours)}:${twoDigits(minutes)}:${twoDigits(seconds)}';
-    }
-
-    return '${twoDigits(minutes)}:${twoDigits(seconds)}';
   }
 }
