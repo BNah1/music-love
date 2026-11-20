@@ -28,7 +28,10 @@ class MusicAudioHandler extends BaseAudioHandler
         PlaybackState(
           controls: [
             MediaControl.skipToPrevious,
-            _player.playing ? MediaControl.pause : MediaControl.play,
+            _player.playing &&
+                    _player.processingState != ProcessingState.completed
+                ? MediaControl.pause
+                : MediaControl.play,
             MediaControl.stop,
             MediaControl.skipToNext,
           ],
@@ -39,7 +42,9 @@ class MusicAudioHandler extends BaseAudioHandler
           },
           androidCompactActionIndices: const [0, 1, 2],
           processingState: _mapProcessingState(_player.processingState),
-          playing: _player.playing,
+          playing:
+              _player.playing &&
+              _player.processingState != ProcessingState.completed,
           updatePosition: _player.position,
           bufferedPosition: _player.bufferedPosition,
           speed: _player.speed,
@@ -63,6 +68,12 @@ class MusicAudioHandler extends BaseAudioHandler
       await _player.seek(Duration.zero);
       playbackState.add(
         playbackState.value.copyWith(
+          controls: [
+            MediaControl.skipToPrevious,
+            MediaControl.play,
+            MediaControl.stop,
+            MediaControl.skipToNext,
+          ],
           playing: false,
           processingState: AudioProcessingState.ready,
           updatePosition: Duration.zero,

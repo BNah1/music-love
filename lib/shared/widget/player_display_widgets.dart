@@ -3,6 +3,7 @@ import 'package:musiclove/core/constant/app_enum.dart';
 import 'package:musiclove/core/constant/theme.dart';
 import 'package:musiclove/feature/play_music/presentation/view/widget/play_music_button_widget.dart';
 import 'package:musiclove/shared/widget/song_artwork_widget.dart';
+import 'package:musiclove/shared/widget/scrolling_song_title.dart';
 
 class PlayerArtwork extends StatelessWidget {
   const PlayerArtwork({
@@ -68,11 +69,9 @@ class PlayerSongInfo extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
         children: [
-          Text(
-            title,
+          ScrollingSongTitle(
+            title: title,
             textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -185,58 +184,118 @@ class PlayerControls extends StatelessWidget {
     required this.onPlayPause,
     required this.onNext,
     required this.onRepeat,
+    required this.onRewind,
+    required this.onForward,
   });
   final bool isPlaying, shuffleEnabled, repeatEnabled, repeatOne;
   final VoidCallback onShuffle, onPrevious, onPlayPause, onNext, onRepeat;
+  final VoidCallback onRewind, onForward;
   @override
   Widget build(BuildContext context) {
     final theme = AppTheme.extensionOf(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          GestureDetector(
-            onTap: onShuffle,
-            child: Icon(
-              Icons.shuffle_rounded,
-              size: 24,
-              color: shuffleEnabled
-                  ? theme.accentColor
-                  : theme.selectedIconColor.withOpacity(.54),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 36),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                tooltip: 'Phát ngẫu nhiên',
+                onPressed: onShuffle,
+                icon: Icon(
+                  Icons.shuffle_rounded,
+                  color: shuffleEnabled
+                      ? theme.accentColor
+                      : theme.selectedIconColor,
+                ),
+              ),
+              IconButton(
+                tooltip: 'Lặp lại',
+                onPressed: onRepeat,
+                icon: Icon(
+                  repeatOne ? Icons.repeat_one_rounded : Icons.repeat_rounded,
+                  color: repeatEnabled
+                      ? theme.accentColor
+                      : theme.selectedIconColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 22),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              PlayerSeekButton(forward: false, onPressed: onRewind),
+              PlayMusicButtonWidget(
+                enumPlayMusic: EnumPlayMusic.back,
+                onTap: onPrevious,
+              ),
+              PlayMusicButtonWidget(
+                onTap: onPlayPause,
+                enumPlayMusic: isPlaying
+                    ? EnumPlayMusic.pause
+                    : EnumPlayMusic.play,
+                isBigButton: true,
+              ),
+              PlayMusicButtonWidget(
+                enumPlayMusic: EnumPlayMusic.next,
+                onTap: onNext,
+              ),
+              PlayerSeekButton(forward: true, onPressed: onForward),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class PlayerSeekButton extends StatelessWidget {
+  const PlayerSeekButton({
+    super.key,
+    required this.forward,
+    required this.onPressed,
+  });
+
+  final bool forward;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = AppTheme.extensionOf(context).selectedIconColor;
+    return IconButton(
+      tooltip: forward ? 'Tiến 15 giây' : 'Lùi 15 giây',
+      onPressed: onPressed,
+      icon: SizedBox.square(
+        dimension: 36,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Icon(
+              forward ? Icons.undo : Icons.redo,
+              size: 36,
+              color: color,
             ),
-          ),
-          const Spacer(),
-          PlayMusicButtonWidget(
-            enumPlayMusic: EnumPlayMusic.back,
-            onTap: onPrevious,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25),
-            child: PlayMusicButtonWidget(
-              onTap: onPlayPause,
-              enumPlayMusic: isPlaying
-                  ? EnumPlayMusic.pause
-                  : EnumPlayMusic.play,
-              isBigButton: true,
+            Positioned(
+              bottom: 0,
+              right: forward ? 8 : null,
+              left: forward ? null : 8,
+              child: Text(
+                '15',
+                style: TextStyle(
+                  color: color,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  height: 1,
+                ),
+              ),
             ),
-          ),
-          PlayMusicButtonWidget(
-            enumPlayMusic: EnumPlayMusic.next,
-            onTap: onNext,
-          ),
-          const Spacer(),
-          GestureDetector(
-            onTap: onRepeat,
-            child: Icon(
-              repeatOne ? Icons.repeat_one_rounded : Icons.repeat_rounded,
-              size: 24,
-              color: repeatEnabled
-                  ? theme.accentColor
-                  : theme.selectedIconColor.withOpacity(.54),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -300,10 +359,8 @@ class MiniPlayerDisplay extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    ScrollingSongTitle(
+                      title: title,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: theme.textColor,

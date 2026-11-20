@@ -21,6 +21,7 @@ Future<void> main() async {
   await Hive.openBox(AppConfig.boxPlaylists);
   await Hive.openBox(AppConfig.boxPlayerCache);
   await Hive.openBox(AppConfig.boxSettings);
+  await Hive.openBox(AppConfig.boxOnlineHistory);
 
   // Khởi tạo audio service chạy toàn app.
   final audioHandler = await AudioService.init(

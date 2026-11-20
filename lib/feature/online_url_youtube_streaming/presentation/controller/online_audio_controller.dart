@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
+import 'package:musiclove/core/constant/app_config.dart';
 import 'package:musiclove/core/audio/coordinated_audio_handler.dart';
 import 'package:musiclove/core/provider/audio_handler_provider.dart';
 import 'package:musiclove/feature/online_url_youtube_streaming/data/youtube_audio_adapter.dart';
@@ -17,6 +19,17 @@ enum OnlineAudioStatus {
   error,
 }
 
+class OnlineHistoryItem {
+  const OnlineHistoryItem({
+    required this.videoId,
+    required this.title,
+    required this.artist,
+    required this.duration,
+  });
+  final String videoId, title, artist;
+  final Duration duration;
+}
+
 class OnlineAudioState {
   const OnlineAudioState({
     this.status = OnlineAudioStatus.empty,
@@ -27,6 +40,7 @@ class OnlineAudioState {
     this.duration = Duration.zero,
     this.isPlaying = false,
     this.error,
+    this.history = const [],
   });
 
   final OnlineAudioStatus status;
@@ -37,6 +51,7 @@ class OnlineAudioState {
   final Duration duration;
   final bool isPlaying;
   final String? error;
+  final List<OnlineHistoryItem> history;
 }
 
 final onlineAudioControllerProvider =
@@ -49,7 +64,7 @@ final onlineAudioControllerProvider =
 
 class OnlineAudioController extends StateNotifier<OnlineAudioState> {
   OnlineAudioController({required this.handler, required this.adapter})
-    : super(const OnlineAudioState()) {
+    : super(OnlineAudioState(history: _readHistory())) {
     _subscription = handler.online.playbackState.listen(_onPlaybackState);
     _positionTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (state.status == OnlineAudioStatus.ready) {
@@ -66,11 +81,33 @@ class OnlineAudioController extends StateNotifier<OnlineAudioState> {
   bool _refreshing = false;
   bool _retriedCurrentSource = false;
 
+  static List<OnlineHistoryItem> _readHistory() {
+    final box = Hive.box(AppConfig.boxOnlineHistory);
+    return box.values
+        .whereType<Map>()
+        .map(
+          (entry) => OnlineHistoryItem(
+            videoId: entry['videoId'] as String,
+            title: entry['title'] as String,
+            artist: entry['artist'] as String,
+            duration: Duration(seconds: entry['duration'] as int),
+          ),
+        )
+        .toList()
+        .reversed
+        .toList();
+  }
+
+  Future<void> playHistory(OnlineHistoryItem item) => _load(item.videoId);
+
   Future<void> submitUrl(String url) async {
     final parsed = YoutubeVideoUrl.parse(url);
     if (parsed == null) {
       OnlineAudioLog.event('input.invalid');
-      state = const OnlineAudioState(status: OnlineAudioStatus.invalidUrl);
+      state = OnlineAudioState(
+        status: OnlineAudioStatus.invalidUrl,
+        history: state.history,
+      );
       return;
     }
     _retriedCurrentSource = false;
@@ -81,24 +118,20 @@ class OnlineAudioController extends StateNotifier<OnlineAudioState> {
   Future<void> _load(
     String videoId, {
     Duration position = Duration.zero,
-    bool alternateClient = false,
   }) async {
     final request = ++_request;
     OnlineAudioLog.event(
       'load.start',
-      'id=$videoId request=$request positionMs=${position.inMilliseconds} '
-          'client=${alternateClient ? 'tv' : 'default'}',
+      'id=$videoId request=$request positionMs=${position.inMilliseconds}',
     );
     state = OnlineAudioState(
       status: OnlineAudioStatus.loading,
       videoId: videoId,
       position: position,
+      history: state.history,
     );
     try {
-      final result = await adapter.resolve(
-        videoId,
-        alternateClient: alternateClient,
-      );
+      final result = await adapter.resolve(videoId);
       if (!mounted || request != _request) {
         OnlineAudioLog.event('load.stale', 'request=$request');
         return;
@@ -126,20 +159,31 @@ class OnlineAudioController extends StateNotifier<OnlineAudioState> {
         duration: result.duration ?? Duration.zero,
         position: position,
         isPlaying: true,
+        history: state.history,
       );
+      try {
+        final box = Hive.box(AppConfig.boxOnlineHistory);
+        await box.delete(videoId);
+        await box.put(videoId, {
+          'videoId': videoId,
+          'title': result.title,
+          'artist': result.artist,
+          'duration': (result.duration ?? Duration.zero).inSeconds,
+        });
+        if (mounted && request == _request) {
+          state = _copy(history: _readHistory());
+        }
+      } catch (error) {
+        OnlineAudioLog.error('history.saveFailed id=$videoId', error);
+      }
     } catch (error) {
       OnlineAudioLog.error('load.failed id=$videoId request=$request', error);
       if (!mounted || request != _request) return;
-      if (!alternateClient && !_retriedCurrentSource) {
-        _retriedCurrentSource = true;
-        OnlineAudioLog.event('load.retry', 'id=$videoId client=tv');
-        await _load(videoId, position: position, alternateClient: true);
-        return;
-      }
       state = OnlineAudioState(
         status: OnlineAudioStatus.error,
         videoId: videoId,
         error: error.toString(),
+        history: state.history,
       );
     }
   }
@@ -161,7 +205,7 @@ class OnlineAudioController extends StateNotifier<OnlineAudioState> {
           'id=$id positionMs=${position.inMilliseconds}',
         );
         unawaited(
-          _load(id, position: position, alternateClient: true).whenComplete(() {
+          _load(id, position: position).whenComplete(() {
             _refreshing = false;
           }),
         );
@@ -210,6 +254,7 @@ class OnlineAudioController extends StateNotifier<OnlineAudioState> {
     Duration? position,
     bool? isPlaying,
     String? error,
+    List<OnlineHistoryItem>? history,
   }) => OnlineAudioState(
     status: status ?? state.status,
     videoId: state.videoId,
@@ -219,6 +264,7 @@ class OnlineAudioController extends StateNotifier<OnlineAudioState> {
     position: position ?? state.position,
     isPlaying: isPlaying ?? state.isPlaying,
     error: error ?? state.error,
+    history: history ?? state.history,
   );
 
   @override

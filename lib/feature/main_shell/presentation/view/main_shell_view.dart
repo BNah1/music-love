@@ -10,26 +10,28 @@ class MainShellView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBody: true,
-      resizeToAvoidBottomInset: false,
-      body: Stack(
-        children: [
-          navigationShell,
-          const Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              // BottomNavWidget cao 65px, cộng padding ngoài và safe-area.
-              // Chừa thêm khoảng để mini player không bị tab bar che.
-              padding: EdgeInsets.only(bottom: 150),
-              child: MiniPlayerOverlay(),
+    return SafeArea(
+      child: Scaffold(
+        extendBody: true,
+        resizeToAvoidBottomInset: false,
+        body: Stack(
+          children: [
+            navigationShell,
+            const Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                // BottomNavWidget cao 65px, cộng padding ngoài và safe-area.
+                // Chừa thêm khoảng để mini player không bị tab bar che.
+                padding: EdgeInsets.only(bottom: 80),
+                child: MiniPlayerOverlay(),
+              ),
             ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: const Padding(
-        padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
-        child: BottomNavWidget(),
+          ],
+        ),
+        bottomNavigationBar: const Padding(
+          padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
+          child: BottomNavWidget(),
+        ),
       ),
     );
   }

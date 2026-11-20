@@ -1,120 +1,229 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:musiclove/core/constant/app_string.dart';
-import 'package:musiclove/core/constant/app_enum.dart';
+import 'package:musiclove/core/constant/routes.dart';
 import 'package:musiclove/core/constant/theme.dart';
-import 'package:musiclove/feature/play_music/presentation/view/widget/play_music_button_widget.dart';
 import 'package:musiclove/feature/online_url_youtube_streaming/presentation/controller/online_audio_controller.dart';
-import 'package:musiclove/shared/widget/player_display_widgets.dart';
+import 'package:musiclove/shared/widget/scrolling_song_title.dart';
 
 class OnlineAudioView extends ConsumerStatefulWidget {
   const OnlineAudioView({super.key});
-
   @override
   ConsumerState<OnlineAudioView> createState() => _OnlineAudioViewState();
 }
 
-class _OnlineAudioViewState extends ConsumerState<OnlineAudioView>
-    with SingleTickerProviderStateMixin {
-  final _urlController = TextEditingController();
-  late final AnimationController _rotation = AnimationController(
-    vsync: this,
-    duration: const Duration(seconds: 20),
-  );
-  double? _dragPosition;
+class _OnlineAudioViewState extends ConsumerState<OnlineAudioView> {
+  final _url = TextEditingController();
+  bool _opening = false;
 
   @override
   void dispose() {
-    _urlController.dispose();
-    _rotation.dispose();
+    _url.dispose();
     super.dispose();
+  }
+
+  Future<void> _open(Future<void> Function() action) async {
+    if (_opening) return;
+    FocusScope.of(context).unfocus();
+    setState(() => _opening = true);
+    try {
+      await action();
+      if (mounted &&
+          ref.read(onlineAudioControllerProvider).status ==
+              OnlineAudioStatus.ready) {
+        context.push(AppRoutes.onlinePlayer);
+      }
+    } finally {
+      if (mounted) setState(() => _opening = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final online = ref.watch(onlineAudioControllerProvider);
     final theme = AppTheme.extensionOf(context);
-    if (online.isPlaying) {
-      if (!_rotation.isAnimating) _rotation.repeat();
-    } else if (_rotation.isAnimating) {
-      _rotation.stop();
-    }
-
     return Scaffold(
       backgroundColor: theme.pageBackground,
       appBar: AppBar(title: Text(context.tr(AppString.tabOnline))),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 160),
-          children: [
-            TextField(
-              controller: _urlController,
-              keyboardType: TextInputType.url,
-              textInputAction: TextInputAction.go,
-              onSubmitted: _submit,
-              decoration: InputDecoration(
-                hintText: context.tr(AppString.onlineUrlHint),
-                border: const OutlineInputBorder(),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _url,
+                      keyboardType: TextInputType.url,
+                      textInputAction: TextInputAction.go,
+                      onSubmitted: _opening
+                          ? null
+                          : (value) => _open(
+                              () => ref
+                                  .read(onlineAudioControllerProvider.notifier)
+                                  .submitUrl(value),
+                            ),
+                      decoration: InputDecoration(
+                        hintText: context.tr(AppString.onlineUrlHint),
+                        prefixIcon: const Icon(Icons.link_rounded),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(22),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton.filled(
+                    tooltip: context.tr(AppString.onlineOpen),
+                    onPressed: _opening
+                        ? null
+                        : () => _open(
+                            () => ref
+                                .read(onlineAudioControllerProvider.notifier)
+                                .submitUrl(_url.text),
+                          ),
+                    icon: const Icon(Icons.play_arrow_rounded),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 12),
-            FilledButton(
-              onPressed: () => _submit(_urlController.text),
-              child: Text(context.tr(AppString.onlineOpen)),
-            ),
-            const SizedBox(height: 24),
-            if (online.status == OnlineAudioStatus.invalidUrl)
-              Text(context.tr(AppString.onlineInvalidUrl)),
-            if (online.status == OnlineAudioStatus.awaitingSource)
-              Text(context.tr(AppString.onlinePending)),
-            if (online.status == OnlineAudioStatus.loading)
-              const Center(child: CircularProgressIndicator()),
-            if (online.status == OnlineAudioStatus.error)
-              Text(online.error ?? context.tr(AppString.homeError)),
-            if (online.status == OnlineAudioStatus.ready) ...[
-              PlayerArtwork(rotation: _rotation, isPlaying: online.isPlaying),
-              const SizedBox(height: 24),
-              PlayerSongInfo(
-                title: online.title ?? '',
-                artist: online.artist ?? '',
-              ),
-              const SizedBox(height: 20),
-              PlayerProgress(
-                position: _dragPosition == null
-                    ? online.position
-                    : Duration(milliseconds: _dragPosition!.round()),
-                duration: online.duration,
-                onChangeStart: (value) => setState(() => _dragPosition = value),
-                onChanged: (value) => setState(() => _dragPosition = value),
-                onChangeEnd: (value) {
-                  setState(() => _dragPosition = null);
-                  ref
-                      .read(onlineAudioControllerProvider.notifier)
-                      .seek(Duration(milliseconds: value.round()));
-                },
+              if (_opening || online.status == OnlineAudioStatus.loading)
+                const Padding(
+                  padding: EdgeInsets.only(top: 12),
+                  child: LinearProgressIndicator(),
+                ),
+              if (online.status == OnlineAudioStatus.invalidUrl ||
+                  online.status == OnlineAudioStatus.error)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Text(
+                    online.status == OnlineAudioStatus.invalidUrl
+                        ? context.tr(AppString.onlineInvalidUrl)
+                        : (online.error ?? context.tr(AppString.homeError)),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ),
+              if (online.title != null && online.videoId != null) ...[
+                const SizedBox(height: 24),
+                _SongCard(
+                  item: OnlineHistoryItem(
+                    videoId: online.videoId!,
+                    title: online.title!,
+                    artist: online.artist ?? '',
+                    duration: online.duration,
+                  ),
+                  prominent: true,
+                  onTap: () => context.push(AppRoutes.onlinePlayer),
+                ),
+              ],
+              const SizedBox(height: 28),
+              Text(
+                context.tr(AppString.onlineRecent),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: theme.textColor,
+                ),
               ),
               const SizedBox(height: 12),
-              Center(
-                child: PlayMusicButtonWidget(
-                  isBigButton: true,
-                  enumPlayMusic: online.isPlaying
-                      ? EnumPlayMusic.pause
-                      : EnumPlayMusic.play,
-                  onTap: () => ref
-                      .read(onlineAudioControllerProvider.notifier)
-                      .togglePlayback(),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 160),
+                  itemCount: online.history.length,
+                  itemBuilder: (context, index) {
+                    final item = online.history[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _SongCard(
+                        item: item,
+                        onTap: () => _open(
+                          () => ref
+                              .read(onlineAudioControllerProvider.notifier)
+                              .playHistory(item),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
-          ],
+          ),
         ),
       ),
     );
   }
+}
 
-  void _submit(String value) {
-    FocusScope.of(context).unfocus();
-    ref.read(onlineAudioControllerProvider.notifier).submitUrl(value);
+class _SongCard extends StatelessWidget {
+  const _SongCard({
+    required this.item,
+    required this.onTap,
+    this.prominent = false,
+  });
+  final OnlineHistoryItem item;
+  final VoidCallback onTap;
+  final bool prominent;
+  @override
+  Widget build(BuildContext context) {
+    final theme = AppTheme.extensionOf(context);
+    return Material(
+      color: theme.cardBackground,
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.all(prominent ? 18 : 12),
+          child: Row(
+            children: [
+              Container(
+                width: prominent ? 64 : 48,
+                height: prominent ? 64 : 48,
+                decoration: BoxDecoration(
+                  color: theme.softAccentColor,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(Icons.music_note_rounded, color: theme.accentColor),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ScrollingSongTitle(
+                      title: item.title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: prominent ? 16 : 14,
+                        color: theme.textColor,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      item.artist,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: theme.subtitleColor),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                prominent
+                    ? Icons.play_circle_fill_rounded
+                    : Icons.play_arrow_rounded,
+                color: theme.accentColor,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

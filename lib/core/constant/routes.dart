@@ -14,6 +14,7 @@ import 'package:musiclove/feature/home/presentation/view/home_view.dart';
 import 'package:musiclove/feature/home/presentation/view/all_songs_view.dart';
 import 'package:musiclove/feature/play_music/presentation/view/play_music_view.dart';
 import 'package:musiclove/feature/online_url_youtube_streaming/presentation/view/online_audio_view.dart';
+import 'package:musiclove/feature/online_url_youtube_streaming/presentation/view/online_player_view.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'root',
@@ -41,6 +42,7 @@ class AppRoutes {
   static const String home = '/home';
   static const String playList = '/playList';
   static const String online = '/online';
+  static const String onlinePlayer = '/online/player';
   static const String playMusic = '/playMusic';
   static const String playlistSongPicker = '/playlistSongPicker';
   static const String allSongs = '/allSongs';
@@ -110,6 +112,11 @@ class AppRoutes {
         ],
       ),
 
+      GoRoute(
+        path: onlinePlayer,
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: OnlinePlayerView()),
+      ),
       GoRoute(
         path: settingMusicPlayer,
         pageBuilder: (context, state) =>

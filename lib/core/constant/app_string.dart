@@ -11,6 +11,7 @@ class AppString {
   static const String onlineOpen = 'online_open';
   static const String onlineInvalidUrl = 'online_invalid_url';
   static const String onlinePending = 'online_pending';
+  static const String onlineRecent = 'online_recent';
   static const String tabSettings = 'tab_settings';
   static const String tabSongs = 'tab_songs';
   static const String tabPlaylists = 'tab_playlists';

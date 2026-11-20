@@ -27,6 +27,7 @@ class OnlineAudioHandler extends BaseAudioHandler with SeekHandler {
   late final StreamSubscription<PlayerException> _errors;
   ProcessingState? _lastProcessingState;
   bool? _lastPlaying;
+  bool _resettingCompletion = false;
 
   Future<void> load({
     required Uri uri,
@@ -65,6 +66,7 @@ class OnlineAudioHandler extends BaseAudioHandler with SeekHandler {
 
   void _publish() {
     final state = _player.processingState;
+    final playing = _player.playing && state != ProcessingState.completed;
     if (state != _lastProcessingState || _player.playing != _lastPlaying) {
       OnlineAudioLog.event(
         'player.state',
@@ -77,7 +79,7 @@ class OnlineAudioHandler extends BaseAudioHandler with SeekHandler {
       PlaybackState(
         controls: [
           MediaControl.skipToPrevious,
-          _player.playing ? MediaControl.pause : MediaControl.play,
+          playing ? MediaControl.pause : MediaControl.play,
           MediaControl.stop,
           MediaControl.skipToNext,
         ],
@@ -90,13 +92,39 @@ class OnlineAudioHandler extends BaseAudioHandler with SeekHandler {
           ProcessingState.ready => AudioProcessingState.ready,
           ProcessingState.completed => AudioProcessingState.completed,
         },
-        playing: _player.playing,
+        playing: playing,
         updatePosition: _player.position,
         bufferedPosition: _player.bufferedPosition,
         speed: _player.speed,
         queueIndex: 0,
       ),
     );
+    if (state == ProcessingState.completed && !_resettingCompletion) {
+      unawaited(_resetCompletedPlayback());
+    }
+  }
+
+  Future<void> _resetCompletedPlayback() async {
+    _resettingCompletion = true;
+    try {
+      await _player.pause();
+      await _player.seek(Duration.zero);
+      playbackState.add(
+        playbackState.value.copyWith(
+          controls: [
+            MediaControl.skipToPrevious,
+            MediaControl.play,
+            MediaControl.stop,
+            MediaControl.skipToNext,
+          ],
+          playing: false,
+          processingState: AudioProcessingState.ready,
+          updatePosition: Duration.zero,
+        ),
+      );
+    } finally {
+      _resettingCompletion = false;
+    }
   }
 
   void _onPlayError(Object error) {

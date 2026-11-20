@@ -362,34 +362,39 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
 
                       _syncRotationAnimation(isPlaying);
 
-                      return Column(
-                        children: [
-                          const Spacer(),
-                          PlayerArtwork(
-                            rotation: _animationController,
-                            isPlaying: isPlaying,
-                            artworkPath:
-                                mediaItem?.artUri?.toFilePath() ??
-                                displaySong?.artworkPath,
-                          ),
-                          const SizedBox(height: 40),
-                          PlayerSongInfo(
-                            title: mediaItem?.title ?? displaySong?.title ?? '',
-                            artist:
-                                mediaItem?.artist ?? displaySong?.artist ?? '',
-                          ),
-                          const SizedBox(height: 30),
-                          _buildProgressBar(
-                            duration:
-                                mediaItem?.duration ??
-                                Duration(
-                                  milliseconds: displaySong?.duration ?? 0,
-                                ),
-                          ),
-                          const SizedBox(height: 20),
-                          _buildControlPanel(playbackState),
-                          const Spacer(flex: 2),
-                        ],
+                      return SafeArea(
+                        child: Column(
+                          children: [
+                            const Spacer(flex: 2),
+                            PlayerArtwork(
+                              rotation: _animationController,
+                              isPlaying: isPlaying,
+                              artworkPath:
+                                  mediaItem?.artUri?.toFilePath() ??
+                                  displaySong?.artworkPath,
+                            ),
+                            const SizedBox(height: 32),
+                            PlayerSongInfo(
+                              title:
+                                  mediaItem?.title ?? displaySong?.title ?? '',
+                              artist:
+                                  mediaItem?.artist ??
+                                  displaySong?.artist ??
+                                  '',
+                            ),
+                            const Spacer(),
+                            _buildProgressBar(
+                              duration:
+                                  mediaItem?.duration ??
+                                  Duration(
+                                    milliseconds: displaySong?.duration ?? 0,
+                                  ),
+                            ),
+                            const SizedBox(height: 12),
+                            _buildControlPanel(playbackState),
+                            const Spacer(),
+                          ],
+                        ),
                       );
                     },
                   );
@@ -534,6 +539,18 @@ class _PlayMusicViewState extends ConsumerState<PlayMusicView>
       onPlayPause: () => _togglePlayPause(isPlaying),
       onNext: _skipToNext,
       onRepeat: () => _toggleRepeat(repeatMode),
+      onRewind: () {
+        final position = playbackState?.position ?? Duration.zero;
+        _seekTo(
+          position > const Duration(seconds: 15)
+              ? position - const Duration(seconds: 15)
+              : Duration.zero,
+        );
+      },
+      onForward: () => _seekTo(
+        (playbackState?.position ?? Duration.zero) +
+            const Duration(seconds: 15),
+      ),
     );
   }
 }

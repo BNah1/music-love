@@ -21,4 +21,5 @@ class AppConfig {
   static const String boxPlaylists = 'playlists';
   static const String boxPlayerCache = 'player_cache';
   static const String boxSettings = 'settings';
+  static const String boxOnlineHistory = 'online_history';
 }

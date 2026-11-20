@@ -35,7 +35,7 @@ class MiniPlayerOverlay extends ConsumerWidget {
               isPlaying: isPlaying,
               onOpen: () {
                 if (audioHandler.activeSource == PlaybackSource.online) {
-                  context.go(AppRoutes.online);
+                  context.push(AppRoutes.onlinePlayer);
                   return;
                 }
                 final path = item.extras?['path'] as String?;
